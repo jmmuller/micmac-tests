@@ -177,8 +177,6 @@ template <class Type> void cMMV1_Conv<Type>::ReadWrite
                                const cRect2& aR2Init
                            )
 {
-
-// StdOut() <<  "aP0File,aP0File, " << aP0File << "\n";
    Init_mm3d_In_MMVII();
    // C'est une image en originie (0,0) necessairement en MMV1
    const tImMMVII & aImV2 = *(aVecImV2.at(0));
@@ -313,8 +311,6 @@ template <class Type>  void  cDataIm2D<Type>::Write(const cDataFileIm2D & aFile,
      //cMMV1_Conv<Type>::ReadWrite(false,*this,aImG,aImB,aFile,aP0,aDyn,aR2);
        cMMV1_Conv<Type>::ReadWrite(false,*this,aImG,aImB,aFile,aP0,aDyn,aR2);
 }
-/*
-*/
 
 
 //  It's difficult to read unsigned int4 with micmac V1, wait for final implementation

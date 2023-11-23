@@ -695,7 +695,7 @@ void BenchDelaunayRand(int aNbPts)
    for (int aK=0 ; aK<aNbPts ; aK++)
    {
         cPt2dr aP = cPt2dr::PRandC() * sqrt(aNbPts);
-	aVP.push_back(aP);
+	    aVP.push_back(aP);
    } 
    BenchDelaunayVPts(aVP);
 }

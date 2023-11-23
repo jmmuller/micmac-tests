@@ -77,6 +77,8 @@ extern cSpecMMVII_Appli  TheSpec_ConvertV1V2_GCPIM;
 extern cSpecMMVII_Appli  TheSpec_SpecSerial;
 extern cSpecMMVII_Appli  TheSpec_CGPReport;
 extern cSpecMMVII_Appli  TheSpec_TiePReport;
+extern cSpecMMVII_Appli  TheSpec_RandomGeneratedDelaunay;
+extern cSpecMMVII_Appli  TheSpec_ComputeTriangleDeformation;
 extern cSpecMMVII_Appli  TheSpec_PoseCmpReport;
 extern cSpecMMVII_Appli  TheSpec_BlockCamInit;   // RIGIDBLOC
 extern cSpecMMVII_Appli  TheSpec_ClinoInit;
@@ -88,8 +90,6 @@ extern cSpecMMVII_Appli  TheSpec_SimulDispl;
 extern cSpecMMVII_Appli  TheSpec_CreateRTL;
 extern cSpecMMVII_Appli  TheSpec_ChSysCo;
 extern cSpecMMVII_Appli  TheSpec_CreateCalib;
-extern cSpecMMVII_Appli  TheSpecImportPushbroom;
-extern cSpecMMVII_Appli TheSpecTestImportSensors;
 };
 
 #endif  //  _MMVII_DeclareAllCmd_H_

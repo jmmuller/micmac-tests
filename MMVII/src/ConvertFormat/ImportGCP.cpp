@@ -121,8 +121,6 @@ int cAppli_ImportGCP::Exe()
 
     mPhProj.SaveGCP(aSetM);
     mPhProj.SaveCurSysCoGCP(aChSys.SysTarget());
-   
-
     // delete aChSys;
 
     return EXIT_SUCCESS;
