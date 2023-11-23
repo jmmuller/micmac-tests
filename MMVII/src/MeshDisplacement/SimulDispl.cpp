@@ -16,7 +16,7 @@ namespace MMVII
 
 /* ==================================================== */
 /*                                                      */
-/*          cAppli_CalibratedSpaceResection             */
+/*          cAppli_SimulDispl          				    */
 /*                                                      */
 /* ==================================================== */
 
@@ -64,9 +64,9 @@ cAppli_SimulDispl::cAppli_SimulDispl
      cMMVII_Appli  (aVArgs,aSpec),
      mAmplDef      (2.0),
      mWithDisc     (true),
-     mImIn         (cPt2di(1,1)),
+     mImIn         (cPt2di(1, 1)),
      mDImIn        (nullptr),
-     mImOut        (cPt2di(1,1)),
+     mImOut        (cPt2di(1, 1)),
      mDImOut       (nullptr)
 {
 }
@@ -86,13 +86,6 @@ cCollecSpecArg2007 & cAppli_SimulDispl::ArgOpt(cCollecSpecArg2007 & anArgOpt)
     return    anArgOpt
 	   << AOpt2007(mAmplDef,"Ampl","Amplitude of deformation",{eTA2007::HDV})
 	   << AOpt2007(mWithDisc,"WithDisc","Do we add disconinuities",{eTA2007::HDV})
-	    /*
-	   << AOpt2007(mNbIterBundle,"NbIterBund","Number of bundle iteration, after ransac init",{eTA2007::HDV})
-	   << AOpt2007(mShowBundle,"ShowBundle","Show detail of bundle results",{eTA2007::HDV})
-	   << AOpt2007(mThrsReject,"ThrRej","Threshold for rejection of outlayer, in pixel",{eTA2007::HDV})
-	   << AOpt2007(mMaxErrOK,"MaxErr","Max error acceptable for initial resection",{eTA2007::HDV})
-	   <<  mPhProj.DPPointsMeasures().ArgDirOutOpt("DirFiltered","Directory for filtered point")
-	   */
     ;
 }
 
@@ -206,8 +199,6 @@ cSpecMMVII_Appli  TheSpec_SimulDispl
 
 #if (0)
 #endif
-
-
 
 }; // MMVII
 
