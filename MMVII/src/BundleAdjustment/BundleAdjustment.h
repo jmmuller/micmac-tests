@@ -116,6 +116,7 @@ class cMMVII_BundleAdj
           void  AddCamPC(cSensorCamPC *);  /// add, error id already exist
           void  AddCam(const std::string & aNameIm);  /// add from name, require PhP exist
 	  void  AddReferencePoses(const std::vector<std::string> &);  ///  [Fofder,SigmGCP,SigmaRot ?]
+	  void  AddReferencePoses(const std::vector<std::string> &);  ///  [Fofder,SigmGCP,SigmaRot ?]
 
 	  void AddBlocRig(const std::vector<double>& aSigma,const std::vector<double>&  aSigmRat ); // RIGIDBLOC
 	  void AddCamBlocRig(const std::string & aCam); // RIGIDBLOC
@@ -216,9 +217,7 @@ class cMMVII_BundleAdj
 	  std::string                        mFolderRefCam;
 	  tREAL8                             mSigmaTrRefCam;
 	  tREAL8                             mSigmaRotRefCam;
-          std::string                        mPatternRef;
 	  bool                               mDoRefCam;
-          cDirsPhProj*                       mDirRefCam;
           // ===================  "Viscosity"  ==================
 
 	  tREAL8   mSigmaViscAngles;  ///< "viscosity"  for angles
