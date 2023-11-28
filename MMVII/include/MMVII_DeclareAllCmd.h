@@ -75,6 +75,7 @@ extern cSpecMMVII_Appli  TheSpec_ConvertV1V2_GCPIM;
 extern cSpecMMVII_Appli  TheSpec_SpecSerial;
 extern cSpecMMVII_Appli  TheSpec_CGPReport;
 extern cSpecMMVII_Appli  TheSpec_TiePReport;
+extern cSpecMMVII_Appli  TheSpec_RandomGeneratedDelaunay;
 extern cSpecMMVII_Appli  TheSpec_PoseCmpReport;
 extern cSpecMMVII_Appli  TheSpec_BlockCamInit;   // RIGIDBLOC
 extern cSpecMMVII_Appli  TheSpec_ClinoInit;
@@ -84,7 +85,6 @@ extern cSpecMMVII_Appli  TheSpec_ImportOri;
 extern cSpecMMVII_Appli  TheSpecDicoRename;
 extern cSpecMMVII_Appli  TheSpec_SimulDispl;
 extern cSpecMMVII_Appli  TheSpec_CreateRTL;
-
 
 };
 
