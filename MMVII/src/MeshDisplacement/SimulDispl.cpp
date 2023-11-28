@@ -1,3 +1,6 @@
+#include <string>
+#include <vector>
+
 #include "MMVII_Image2D.h"
 #include "cMMVII_Appli.h"
 #include "MMVII_Linear2DFiltering.h"
