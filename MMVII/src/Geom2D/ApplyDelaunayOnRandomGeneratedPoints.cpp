@@ -28,8 +28,8 @@ namespace MMVII
 	{
 	public:
 
-		// typedef cIm2D<tREAL4> tIm;
-        // typedef cDataIm2D<tREAL4> tDIm;
+		typedef cIm2D<tREAL4> tIm;
+        typedef cDataIm2D<tREAL4> tDIm;
 
 		cAppli_RandomGeneratedDelaunay(const std::vector<std::string> &aVArgs,
 									   const cSpecMMVII_Appli &aSpec);
@@ -40,6 +40,7 @@ namespace MMVII
 
 		void ApplyAndSaveDelaunayTriangulationOnPoints(const std::vector<cPt2dr> &aVP);
 		void GeneratePointsForDelaunay(const int aNbCol, const int aNbLin);
+		void ConstructUniformRandomVector(std::vector<cPt2dr> & aVP);
 
 	private:
 		// ==   Mandatory args ====
@@ -54,15 +55,19 @@ namespace MMVII
 		bool mPlyFileisBinary;
 
 		// ==    Internal variables ====
-		// tIm mImIn;    ///<  memory representation of the image
-        // tDIm *mDImIn; ///<  memory representation of the image
+		tIm mImIn;    ///<  memory representation of the image
+        tDIm *mDImIn; ///<  memory representation of the image
         cPt2di mSz;
         // tIm mImOut;    ///<  memory representation of the image
         // tDIm *mDImOut; ///<  memory representation of the image
 	};
 
 	cAppli_RandomGeneratedDelaunay::cAppli_RandomGeneratedDelaunay(const std::vector<std::string> &aVArgs,
-        const cSpecMMVII_Appli &aSpec) : cMMVII_Appli(aVArgs, aSpec), mPlyFileisBinary(false)
+        const cSpecMMVII_Appli &aSpec) :
+             cMMVII_Appli(aVArgs, aSpec),
+			 mPlyFileisBinary(false),
+			 mImIn(cPt2di(1, 1)),
+             mDImIn(nullptr)
 	{
 	}
 
@@ -70,7 +75,7 @@ namespace MMVII
 	{
 		return anArgObl
 				<< Arg2007(mNameInputImage, "Name of input image file.", {{eTA2007::FileImage}, {eTA2007::FileDirProj}})		
-			   	<< Arg2007(mNamePlyFile, "Name of file to save in .ply format.", {{eTA2007::FileCloud}, {eTA2007::FileDirProj}})
+                << Arg2007(mNamePlyFile, "Name of file to save in .ply format.", {{eTA2007::FileCloud}})
 			   	<< Arg2007(mNumberPointsToGenerate, "Number of points you want to generate for triangulation.")
 			   	<< Arg2007(mRandomUniformLawUpperBound, "Maximum value that the uniform law can draw from.");
 	}
@@ -89,6 +94,7 @@ namespace MMVII
 	void cAppli_RandomGeneratedDelaunay::ApplyAndSaveDelaunayTriangulationOnPoints(const std::vector<cPt2dr> &aVP)
 	{
 		cTriangulation2D<tREAL8> aDelTri(aVP);
+
 		aDelTri.MakeDelaunay();
 
 		// Parse all triangle
@@ -110,39 +116,46 @@ namespace MMVII
 		aDelTri.WriteFile(mNamePlyFile, mPlyFileisBinary);
 	}
 
-	void cAppli_RandomGeneratedDelaunay::GeneratePointsForDelaunay(const int aNbCol, const int aNbLin)
+	void cAppli_RandomGeneratedDelaunay::ConstructUniformRandomVector(std::vector<cPt2dr> & aVPts)
 	{
-		std::vector<cPt2dr> aVP;
 		for (int aNbPt = 0; aNbPt < mNumberPointsToGenerate; aNbPt++)
 		{
-			double uniform_random_number = RandUnif_N(mRandomUniformLawUpperBound);
-			cPt2dr aPt(uniform_random_number, uniform_random_number);
-			if ((aPt.x() < mRandomUniformLawUpperBound) && (aPt.x() < aNbCol) && (aPt.x() < aNbLin))
-			{
-				cPt2dr coords = aPt;
-				aVP.push_back(coords);
-			}
+			double uniform_random_line = RandUnif_N(mRandomUniformLawUpperBound);
+			double uniform_random_col = RandUnif_N(mRandomUniformLawUpperBound);
+			cPt2dr aUniformRandomPt(uniform_random_line, uniform_random_col);
+			aVPts.push_back(aUniformRandomPt);
 		}
-		ApplyAndSaveDelaunayTriangulationOnPoints(aVP); // Apply Delaunay triangulation on generated points.
+	}
+
+	void cAppli_RandomGeneratedDelaunay::GeneratePointsForDelaunay(const int aNbLin, const int aNbCol)
+	{
+		std::vector<cPt2dr> aVPts;
+
+		const int minimum_lin_col = std::min(aNbLin, aNbCol);
+
+		while (mRandomUniformLawUpperBound >= minimum_lin_col)
+		{
+			StdOut() << "Maximum value drawn from uniform law needs to be smaller than " << minimum_lin_col << "." << std::endl;
+			std::cin >> mRandomUniformLawUpperBound;
+		}
+		ConstructUniformRandomVector(aVPts);
+
+		ApplyAndSaveDelaunayTriangulationOnPoints(aVPts); // Apply Delaunay triangulation on generated points.
 	}
 
 	//----------------------------------------
 
 	int cAppli_RandomGeneratedDelaunay::Exe()
 	{
-		/*
 		mImIn = tIm::FromFile(mNameInputImage);
-        cDataFileIm2D aDescFile = cDataFileIm2D::Create(mNameInputImage, false);
+        // cDataFileIm2D aDescFile = cDataFileIm2D::Create(mNameInputImage, false);
 
         mDImIn = &mImIn.DIm();
         mSz = mDImIn->Sz();
-		*/
-        // mImOut = tIm(mSz);
-        // mDImOut = &mImOut.DIm();
 
-		GeneratePointsForDelaunay(2522, 3153);
+		GeneratePointsForDelaunay(mSz.y(), mSz.x());
 
-		// StdOut() << "hello , size of image = " << mImIn.DIm().Sz() << " " << mDImIn->Sz() << "\n";
+		// StdOut() << "hello , size of image = " << mImIn.DIm().Sz().x() << " and " << mDImIn->Sz().y() << "\n";
 		return EXIT_SUCCESS;
 	}
 
@@ -152,13 +165,19 @@ namespace MMVII
 	/*                                                      */
 	/* ==================================================== */
 
+	tMMVII_UnikPApli Alloc_RandomGeneratedDelaunay(const std::vector<std::string> &aVArgs, const cSpecMMVII_Appli &aSpec)
+    {
+        return tMMVII_UnikPApli(new cAppli_RandomGeneratedDelaunay(aVArgs, aSpec));
+    }
+
 	cSpecMMVII_Appli TheSpec_RandomGeneratedDelaunay(
 		"RandomGeneratedDelaunay",
-		cAppli_RandomGeneratedDelaunay,
+		Alloc_RandomGeneratedDelaunay,
 		"Generate random points and apply Delaunay triangulation",
 		{eApF::ImProc}, // category
 		{eApDT::Image},	   // input
 		{eApDT::Ply},	   // output
 		__FILE__);
+
 
 }; // MMVII
