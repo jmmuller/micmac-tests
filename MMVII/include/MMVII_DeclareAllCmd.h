@@ -87,6 +87,7 @@ extern cSpecMMVII_Appli  TheSpecDicoRename;
 extern cSpecMMVII_Appli  TheSpec_SimulDispl;
 extern cSpecMMVII_Appli  TheSpec_CreateRTL;
 extern cSpecMMVII_Appli  TheSpec_ChSysCo;
+extern cSpecMMVII_Appli  TheSpec_CreateCalib;
 };
 
 #endif  //  _MMVII_DeclareAllCmd_H_
