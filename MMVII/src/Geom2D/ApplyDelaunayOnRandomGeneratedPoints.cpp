@@ -51,15 +51,12 @@ namespace MMVII
 
 		// ==   Optionnal args ====
 
-		// long unsigned int mLimitNumberOfPoints;
 		bool mPlyFileisBinary;
 
 		// ==    Internal variables ====
 		tIm mImIn;    ///<  memory representation of the image
         tDIm *mDImIn; ///<  memory representation of the image
         cPt2di mSz;
-        // tIm mImOut;    ///<  memory representation of the image
-        // tDIm *mDImOut; ///<  memory representation of the image
 	};
 
 	cAppli_RandomGeneratedDelaunay::cAppli_RandomGeneratedDelaunay(const std::vector<std::string> &aVArgs,
@@ -84,7 +81,6 @@ namespace MMVII
 	{
 
 		return anArgOpt
-				// << AOpt2007(mLimitNumberOfPoints, "PointsLimit", "Maximum possible number of points to generate for triangulation.", {eTA2007::HDV})
 				<< AOpt2007(mPlyFileisBinary, "PlyFileIsBinary", "Whether to save the .ply file binarised or not.", {eTA2007::HDV});
 
 	}
@@ -96,8 +92,8 @@ namespace MMVII
 		cTriangulation2D<tREAL8> aDelTri(aVP);
 
 		aDelTri.MakeDelaunay();
-
-		// Parse all triangle
+		std::vector<cPt3dr> coordinates_barycenter_vector;
+		// Loop over all triangle
 		for (size_t aKt = 0; aKt < aDelTri.NbFace(); aKt++)
 		{
 			cTriangle<tREAL8, 2> aTri = aDelTri.KthTri(aKt);
@@ -111,9 +107,13 @@ namespace MMVII
 			double aRadiusCircum = Norm2(aC - aTri.Pt(0));
 			double aDif = std::abs(aRadiusCircum - aMinDist);
 			MMVII_INTERNAL_ASSERT_bench(aDif < 1e-5, "Inscribed circle property in delaunay");
+			cTriangle2DCompiled aCompTri(aTri);
+			cPt3dr barycenter_coordinates = aCompTri.CoordBarry(aTri.Barry());
+			coordinates_barycenter_vector.push_back(barycenter_coordinates);
+			// StdOut() << aTri.Barry().x() << std::endl;
 		}
 
-		aDelTri.WriteFile(mNamePlyFile, mPlyFileisBinary);
+		// aDelTri.WriteFile(mNamePlyFile, mPlyFileisBinary);
 	}
 
 	void cAppli_RandomGeneratedDelaunay::ConstructUniformRandomVector(std::vector<cPt2dr> & aVPts)
@@ -148,14 +148,12 @@ namespace MMVII
 	int cAppli_RandomGeneratedDelaunay::Exe()
 	{
 		mImIn = tIm::FromFile(mNameInputImage);
-        // cDataFileIm2D aDescFile = cDataFileIm2D::Create(mNameInputImage, false);
 
         mDImIn = &mImIn.DIm();
         mSz = mDImIn->Sz();
 
 		GeneratePointsForDelaunay(mSz.y(), mSz.x());
 
-		// StdOut() << "hello , size of image = " << mImIn.DIm().Sz().x() << " and " << mDImIn->Sz().y() << "\n";
 		return EXIT_SUCCESS;
 	}
 
