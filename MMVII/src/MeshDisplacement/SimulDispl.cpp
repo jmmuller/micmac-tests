@@ -135,9 +135,7 @@ namespace MMVII
             {
                 aImRegion.DIm().SetV(aPix, aImRegion.DIm().GetV(aPix) > 0);
                 if (aImRegion.DIm().GetV(aPix))
-                {
                     std::swap(aImDispx.DIm().GetReference_V(aPix), aImDispy.DIm().GetReference_V(aPix));
-                }
             }
         }
 
