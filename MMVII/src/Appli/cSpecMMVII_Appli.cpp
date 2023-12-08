@@ -232,6 +232,7 @@ std::vector<cSpecMMVII_Appli *> & cSpecMMVII_Appli::InternVecAll()
         TheVecAll.push_back(&TheSpec_CreateCalib);
         TheVecAll.push_back(&TheSpec_RandomGeneratedDelaunay);
         TheVecAll.push_back(&TheSpec_ComputeTriangleDeformation);
+        TheVecAll.push_back(&TheSpec_ImportTiePMul);
 
         std::sort(TheVecAll.begin(),TheVecAll.end(),CmpCmd);
    }
