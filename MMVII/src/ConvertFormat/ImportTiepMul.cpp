@@ -119,6 +119,12 @@ int cAppli_ImportTiePMul::Exe()
         false
     );
 
+    // VNames will contains NameIm and NamePt, we need to know which is first
+    size_t aIndImInFormat = mFormat.find('I');
+    size_t aIndPtInFormat = mFormat.find('N');
+    size_t aIndPt = (aIndPtInFormat<aIndImInFormat) ? 0 : 1;
+    size_t aIndIm = 1-aIndPt;
+
     size_t  aRankI_InF = mFormat.find('I');
     size_t  aRankP_InF = mFormat.find('N');
     size_t  aRankP = (aRankP_InF<aRankI_InF) ? 0 : 1;
