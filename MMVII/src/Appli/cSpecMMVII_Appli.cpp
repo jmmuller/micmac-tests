@@ -234,6 +234,7 @@ std::vector<cSpecMMVII_Appli *> & cSpecMMVII_Appli::InternVecAll()
         TheVecAll.push_back(&TheSpec_ImportMesImGCP);
         TheVecAll.push_back(&TheSpecImportPushbroom);
         TheVecAll.push_back(&TheSpec_ComputeTriangleDeformation);
+        TheVecAll.push_back(&TheSpec_ImportTiePMul);
 
 
         std::sort(TheVecAll.begin(),TheVecAll.end(),CmpCmd);
