@@ -217,6 +217,7 @@ class cMMVII_BundleAdj
 	  std::string                        mFolderRefCam;
 	  tREAL8                             mSigmaTrRefCam;
 	  tREAL8                             mSigmaRotRefCam;
+          std::string                        mPatternRef;
 	  bool                               mDoRefCam;
           cDirsPhProj*                       mDirRefCam;
           // ===================  "Viscosity"  ==================
