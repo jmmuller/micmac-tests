@@ -166,6 +166,8 @@ NS_SymbolicDerivative::cCalculator<double> * EqTopoSubFrame(bool WithDerive,int 
 	   
 /// Equation used to optimize homothetic transform between model and image (used as a tutorial for deformable model)
 NS_SymbolicDerivative::cCalculator<double> * EqDeformImHomotethy(bool WithDerive,int aSzBuf);
+/// Equation used to optimize homothetic transform between model and triangle.
+NS_SymbolicDerivative::cCalculator<double> * EqDeformTriHomothety(bool WithDerive,int aSzBuf); // change here
 
            // .............   Covariance propagation  .............
 
@@ -175,14 +177,6 @@ NS_SymbolicDerivative::cCalculator<double> * EqNetworkConsDistProgCov(bool WithD
 NS_SymbolicDerivative::cCalculator<double> * EqNetworkConsDistFixPoints(bool WithDerive,int aSzBuf,const cPt2di& aSzN,bool WithSimUK);
 ///  idem, but more adapted to real case (as in surface devlopment)
 NS_SymbolicDerivative::cCalculator<double> * EqNetworkConsDistFixPoints(bool WithDerive,int aSzBuf,int aNbPts);
-
-
-
-
-
-
-
-
 
 };
 

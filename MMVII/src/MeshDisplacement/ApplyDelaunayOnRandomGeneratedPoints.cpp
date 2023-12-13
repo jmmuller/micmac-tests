@@ -1,8 +1,6 @@
 #include "cMMVII_Appli.h"
-#include "MMVII_Image2D.h"
 #include "MMVII_Geom2D.h"
-#include "MMVII_nums.h"
-#include "MMVII_enums.h"
+
 
 /**
    \file ApplyDelaunayOnRandomGeneratedPoints.cpp
@@ -34,14 +32,14 @@ namespace MMVII
 		cCollecSpecArg2007 &ArgObl(cCollecSpecArg2007 &anArgObl) override;
 		cCollecSpecArg2007 &ArgOpt(cCollecSpecArg2007 &anArgOpt) override;
 
-		void ApplyAndSaveDelaunayTriangulationOnPoints(const std::vector<cPt2dr> &aVP, const bool shift_points_of_triangles);
-		void GeneratePointsForDelaunay(const int aNbCol, const int aNbLin, const bool shift_points_of_triangles);
-		void ConstructUniformRandomVector(std::vector<cPt2dr> &aVP);
+		void ApplyAndSaveDelaunayTriangulationOnPoints();
+		void GeneratePointsForDelaunay();
+		void ConstructUniformRandomVector();
 		// void GetCoordinatesInsideTriangles(const cTriangulation2D<tREAL8> & aDelaunayTriangle);
-		void ComputeMinimumDistanceToCircle(const std::vector<cPt2dr> & aVP, const cTriangle<tREAL8, 2> & aTri);
-		void ComputeShiftedTrianglesAndPoints(cTriangle<tREAL8, 2> & aTri, std::vector<cPt2dr> & ShiftedTriangleCoordinates,
-											  const double uniform_random_red_channel, const double uniform_random_green_channel,
-											  const double uniform_random_blue_channel);
+		void ComputeMinimumDistanceToCircle(const cTriangle<tREAL8, 2> & aTri);
+		void ComputeShiftedTrianglesAndPoints(const cTriangle<tREAL8, 2> & aTri, std::vector<cPt2dr> & ShiftedTriangleCoordinates,
+											  const double aUniformRandomRedChannel, const double aUniformRandomGreenChannel,
+											  const double aUniformRandomBlueChannel);
 
 	private:
 		// ==   Mandatory args ====
@@ -59,7 +57,8 @@ namespace MMVII
 		// ==    Internal variables ====
 		tIm mImIn;    ///<  memory representation of the image
         tDIm *mDImIn; ///<  memory representation of the image
-        cPt2di mSz;
+        cPt2di mSz; // Size of images
+		std::vector<cPt2dr> mVectorPts; // A vector containing a set of points
 	};
 
 	cAppli_RandomGeneratedDelaunay::cAppli_RandomGeneratedDelaunay(const std::vector<std::string> &aVArgs,
@@ -82,7 +81,6 @@ namespace MMVII
 
 	cCollecSpecArg2007 &cAppli_RandomGeneratedDelaunay::ArgOpt(cCollecSpecArg2007 &anArgOpt)
 	{
-
 		return anArgOpt
 				<< AOpt2007(mShiftTriangles, "ShiftTriangles", "Whether to shift points of triangles after application of Delaunay triangulation.", {eTA2007::HDV})
 				<< AOpt2007(mPlyFileisBinary, "PlyFileIsBinary", "Whether to save the .ply file binarised or not.", {eTA2007::HDV})
@@ -107,18 +105,18 @@ namespace MMVII
 	}
 	*/
 
-	void cAppli_RandomGeneratedDelaunay::ComputeShiftedTrianglesAndPoints(cTriangle<tREAL8, 2> & aTri,
+	void cAppli_RandomGeneratedDelaunay::ComputeShiftedTrianglesAndPoints(const cTriangle<tREAL8, 2> & aTri,
 																		  std::vector<cPt2dr> & ShiftedTriangleCoordinates,
-																		  const double uniform_random_red_channel, 
-																		  const double uniform_random_green_channel,
-																		  const double uniform_random_blue_channel)
+																		  const double aUniformRandomRedChannel, 
+																		  const double aUniformRandomGreenChannel,
+																		  const double aUniformRandomBlueChannel)
 	{
-		cTriangle2DCompiled aCompTri(aTri);
+		const cTriangle2DCompiled aCompTri(aTri);
 
 		// Compute shifts depending on point of triangle
-		cPt2dr PercentDiffA = 0.01 * (aTri.Pt(0) - aTri.Pt(2));
-		cPt2dr PercentDiffB = 0.015 * (aTri.Pt(1) - aTri.Pt(0));
-		cPt2dr PercentDiffC = 0.02 * (aTri.Pt(2) - aTri.Pt(1));
+		const cPt2dr PercentDiffA = 0.01 * (aTri.Pt(0) - aTri.Pt(2));
+		const cPt2dr PercentDiffB = 0.015 * (aTri.Pt(1) - aTri.Pt(0));
+		const cPt2dr PercentDiffC = 0.02 * (aTri.Pt(2) - aTri.Pt(1));
 
 		ShiftedTriangleCoordinates.push_back(aTri.Pt(0) + PercentDiffA);
 		ShiftedTriangleCoordinates.push_back(aTri.Pt(1) + PercentDiffB);
@@ -131,38 +129,38 @@ namespace MMVII
 		{					
 			if (filledPixel % 10 == 0)
 			{
-				cPt2dr aFilledPoint(aVectorToFillwithInsidePixels[filledPixel].x(), aVectorToFillwithInsidePixels[filledPixel].y());
-				cPt3dr barycenter_coordinates = aCompTri.CoordBarry(aFilledPoint);
-				cPt2dr ShiftedInsidePixels = cPt2dr(aFilledPoint.x() + barycenter_coordinates.x() * PercentDiffA.x() +
+				const cPt2dr aFilledPoint(aVectorToFillwithInsidePixels[filledPixel].x(), aVectorToFillwithInsidePixels[filledPixel].y());
+				const cPt3dr barycenter_coordinates = aCompTri.CoordBarry(aFilledPoint);
+				const cPt2dr ShiftedInsidePixels = cPt2dr(aFilledPoint.x() + barycenter_coordinates.x() * PercentDiffA.x() +
 													barycenter_coordinates.y() * PercentDiffB.x() + barycenter_coordinates.z() * PercentDiffC.x(), 
 													aFilledPoint.y() + barycenter_coordinates.x() * PercentDiffA.y() +
 													barycenter_coordinates.y() * PercentDiffB.y() + barycenter_coordinates.z() * PercentDiffC.y());
 
-				StdOut() << aFilledPoint.x() << " " << aFilledPoint.y() << " " << uniform_random_red_channel 
-							<< " " << uniform_random_green_channel << " " << uniform_random_blue_channel << std::endl;
+				StdOut() << aFilledPoint.x() << " " << aFilledPoint.y() << " " << aUniformRandomRedChannel 
+							<< " " << aUniformRandomGreenChannel << " " << aUniformRandomBlueChannel << std::endl;
 				StdOut() << ShiftedInsidePixels.x() << " " << ShiftedInsidePixels.y() << " " 
-							<< uniform_random_red_channel << " " << uniform_random_green_channel << " " << uniform_random_blue_channel << std::endl;
+							<< aUniformRandomRedChannel << " " << aUniformRandomGreenChannel << " " << aUniformRandomBlueChannel << std::endl;
 			}
 		}
 	}
 
-	void cAppli_RandomGeneratedDelaunay::ComputeMinimumDistanceToCircle(const std::vector<cPt2dr> & aVP, const cTriangle<tREAL8, 2> & aTri)
+	void cAppli_RandomGeneratedDelaunay::ComputeMinimumDistanceToCircle(const cTriangle<tREAL8, 2> & aTri)
 	{
 			// Compute center circle circum
-			cPt2dr aC = aTri.CenterInscribedCircle();
+			const cPt2dr aC = aTri.CenterInscribedCircle();
 			// Compute min dist to this circle
 			double aMinDist = 1e20;
-			for (const auto &aPt : aVP)
+			for (const auto &aPt : mVectorPts)
 				aMinDist = std::min(aMinDist, Norm2(aC - aPt));
 			// This  min dist must be (almost) equal to circum-radius
-			double aRadiusCircum = Norm2(aC - aTri.Pt(0));
-			double aDif = std::abs(aRadiusCircum - aMinDist);
+			const double aRadiusCircum = Norm2(aC - aTri.Pt(0));
+			const double aDif = std::abs(aRadiusCircum - aMinDist);
 			MMVII_INTERNAL_ASSERT_bench(aDif < 1e-5, "Inscribed circle property in delaunay");
 	}
 
-	void cAppli_RandomGeneratedDelaunay::ApplyAndSaveDelaunayTriangulationOnPoints(const std::vector<cPt2dr> & aVP, const bool shift_points_of_triangles)
+	void cAppli_RandomGeneratedDelaunay::ApplyAndSaveDelaunayTriangulationOnPoints()
 	{
-		cTriangulation2D<tREAL8> aDelTri(aVP);
+		cTriangulation2D<tREAL8> aDelTri(mVectorPts);
 
 		aDelTri.MakeDelaunay();
 
@@ -171,17 +169,18 @@ namespace MMVII
 		// Loop over all triangle
 		for (size_t aKt = 0; aKt < aDelTri.NbFace(); aKt++)
 		{
-			cTriangle<tREAL8, 2> aTri = aDelTri.KthTri(aKt);
-			ComputeMinimumDistanceToCircle(aVP, aTri);
+			const cTriangle<tREAL8, 2> aTri = aDelTri.KthTri(aKt);
+			ComputeMinimumDistanceToCircle(aTri);
 
-			// for colouring points in representation
-			double uniform_random_red_channel = RandUnif_N(256);
-			double uniform_random_green_channel = RandUnif_N(256);
-			double uniform_random_blue_channel = RandUnif_N(256);
-
-			if (shift_points_of_triangles)
-				ComputeShiftedTrianglesAndPoints(aTri, ShiftedTriangleCoordinates, uniform_random_red_channel, 
-												 uniform_random_green_channel, uniform_random_blue_channel);
+			if (mShiftTriangles)
+			{
+				// for colouring points in representation
+				double aUniformRandomRedChannel = RandUnif_N(256);
+				double aUniformRandomGreenChannel = RandUnif_N(256);
+				double aUniformRandomBlueChannel = RandUnif_N(256);
+				ComputeShiftedTrianglesAndPoints(aTri, ShiftedTriangleCoordinates, aUniformRandomRedChannel, 
+												 aUniformRandomGreenChannel, aUniformRandomBlueChannel);
+			}
 		}
 
 		cTriangulation2D<tREAL8> aModifiedDelTri(ShiftedTriangleCoordinates);
@@ -194,33 +193,33 @@ namespace MMVII
 		aModifiedDelTri.WriteFile(mNameModifedTrianglePlyFile, mPlyFileisBinary);
 	}
 
-	void cAppli_RandomGeneratedDelaunay::ConstructUniformRandomVector(std::vector<cPt2dr> & aVPts)
+	void cAppli_RandomGeneratedDelaunay::ConstructUniformRandomVector()
 	{
 		// Generate coordinates from drawing lines and columns of coordinates from a uniform distribution
 		for (int aNbPt = 0; aNbPt < mNumberPointsToGenerate; aNbPt++)
 		{
-			double uniform_random_line = RandUnif_N(mRandomUniformLawUpperBound);
-			double uniform_random_col = RandUnif_N(mRandomUniformLawUpperBound);
-			cPt2dr aUniformRandomPt(uniform_random_line, uniform_random_col);
-			aVPts.push_back(aUniformRandomPt);
+			const double aUniformRandomLine = RandUnif_N(mRandomUniformLawUpperBound);
+			const double aUniformRandomCol = RandUnif_N(mRandomUniformLawUpperBound);
+			const cPt2dr aUniformRandomPt(aUniformRandomLine, aUniformRandomCol);
+			mVectorPts.push_back(aUniformRandomPt);
 		}
 	}
 
-	void cAppli_RandomGeneratedDelaunay::GeneratePointsForDelaunay(const int aNbLin, const int aNbCol, const bool shift_points_of_triangles)
+	void cAppli_RandomGeneratedDelaunay::GeneratePointsForDelaunay()
 	{
-		std::vector<cPt2dr> aVPts;
+		// std::vector<cPt2dr> aVPts;
 
-		const int minimum_lin_col = std::min(aNbLin, aNbCol);
+		const int aMinimumLinCol = std::min(mSz.y(), mSz.x());
 
 		// make sure that values greater than image size can't be drawn from uniform law.
-		while (mRandomUniformLawUpperBound >= minimum_lin_col)
+		while (mRandomUniformLawUpperBound >= aMinimumLinCol)
 		{
-			StdOut() << "Maximum value drawn from uniform law needs to be smaller than " << minimum_lin_col << "." << std::endl;
+			StdOut() << "Maximum value drawn from uniform law needs to be smaller than " << aMinimumLinCol << "." << std::endl;
 			std::cin >> mRandomUniformLawUpperBound;
 		}
-		ConstructUniformRandomVector(aVPts);
+		ConstructUniformRandomVector();
 
-		ApplyAndSaveDelaunayTriangulationOnPoints(aVPts, shift_points_of_triangles); // Apply Delaunay triangulation on generated points.
+		ApplyAndSaveDelaunayTriangulationOnPoints(); // Apply Delaunay triangulation on generated points.
 	}
 
 	//----------------------------------------
@@ -238,7 +237,7 @@ namespace MMVII
 		mDImIn = &mImIn.DIm();
 		mSz = mDImIn->Sz();
 
-		GeneratePointsForDelaunay(mSz.y(), mSz.x(), mShiftTriangles);
+		GeneratePointsForDelaunay();
 
 		return EXIT_SUCCESS;
 	}
