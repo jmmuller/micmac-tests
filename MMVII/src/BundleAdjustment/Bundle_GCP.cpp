@@ -173,7 +173,17 @@ template <const int Dim> cPtxdr_UK<Dim>::cPtxdr_UK(const tPt & aPt) :
 
 template <const int Dim>  cPtxdr_UK<Dim>::~cPtxdr_UK()
 {
-        OUK_Reset();
+    tPoseR * aPose = nullptr;
+    cResolSysNonLinear<tREAL8> *  aR8_Sys = nullptr;
+    std::vector<int> aVIndGlob;
+
+    cCenterPose_UK aCPUK(*aPose);
+    aCPUK.PushIndexes(aVIndGlob);
+    aR8_Sys->AddEqFixCurVar(aCPUK,aCPUK.Pt(),1.0);
+
+   //  Can also use temporary 
+    cCenterPose_UK(*aPose).PushIndexes(aVIndGlob);
+    aR8_Sys->AddEqFixCurVar(cCenterPose_UK(*aPose),aPose->Tr(),1.0);
 }
 
 template <const int Dim> void cPtxdr_UK<Dim>::PutUknowsInSetInterval()
