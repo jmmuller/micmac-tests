@@ -1,6 +1,3 @@
-#include <string>
-#include <vector>
-
 #include "MMVII_Image2D.h"
 #include "cMMVII_Appli.h"
 #include "MMVII_Linear2DFiltering.h"
@@ -11,16 +8,16 @@
 
    \brief file for generating simulation of smooth displacement
 
- */
+ **/
 
 namespace MMVII
 {
 
-    /* ==================================================== */
-    /*                                                      */
-    /*          cAppli_SimulDispl          				    */
-    /*                                                      */
-    /* ==================================================== */
+    /* ======================================== */
+    /*                                          */
+    /*          cAppli_SimulDispl       	    */
+    /*                                          */
+    /* ======================================== */
 
     class cAppli_SimulDispl : public cMMVII_Appli
     {
@@ -121,9 +118,8 @@ namespace MMVII
         mDImOut = &mImOut.DIm();
 
         for (const auto &aPix : *mDImIn)
-        {
             mDImOut->SetV(aPix, 255 - mDImIn->GetV(aPix));
-        }
+
 
         tImDispl aImDispx = GenerateSmoothRandDispl();
         tImDispl aImDispy = GenerateSmoothRandDispl();
@@ -158,11 +154,11 @@ namespace MMVII
         return EXIT_SUCCESS;
     }
 
-    /* ==================================================== */
-    /*                                                      */
-    /*               MMVII                                  */
-    /*                                                      */
-    /* ==================================================== */
+    /* ====================================== */
+    /*                                        */
+    /*               MMVII                    */
+    /*                                        */
+    /* ====================================== */
 
     tMMVII_UnikPApli Alloc_SimulDispl(const std::vector<std::string> &aVArgs, const cSpecMMVII_Appli &aSpec)
     {
