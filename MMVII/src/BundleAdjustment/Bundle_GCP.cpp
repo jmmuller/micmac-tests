@@ -173,8 +173,8 @@ template <const int Dim> cPtxdr_UK<Dim>::cPtxdr_UK(const tPt & aPt) :
 
 template <const int Dim>  cPtxdr_UK<Dim>::~cPtxdr_UK()
 {
-    tPoseR * aPose = nullptr;
-    cResolSysNonLinear<tREAL8> *  aR8_Sys = nullptr;
+    tPoseR * aPose = (tPoseR * ) GeyVoidPtr();
+    cResolSysNonLinear<tREAL8> *  aR8_Sys = (cResolSysNonLinear<tREAL8> *) GeyVoidPtr();
     std::vector<int> aVIndGlob;
 
     cCenterPose_UK aCPUK(*aPose);
