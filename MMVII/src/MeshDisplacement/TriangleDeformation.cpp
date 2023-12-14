@@ -4,7 +4,8 @@
 #include "MMVII_Geom2D.h"
 
 #include "MMVII_PhgrDist.h"
-#include "MMVII_TplSymbTriangle.h"
+#include "MMVII_TplSymbImage.h"
+// #include "MMVII_TplSymbTriangle.h"
 
 using namespace NS_SymbolicDerivative;
 
@@ -38,6 +39,11 @@ namespace MMVII
         cCollecSpecArg2007 &ArgObl(cCollecSpecArg2007 &anArgObl) override;
         cCollecSpecArg2007 &ArgOpt(cCollecSpecArg2007 &anArgOpt) override;
 
+    
+        void ComputeMinimumDistanceToCircle(const cTriangle<tREAL8, 2> & aTri);
+        void BuildTrianglesAndApplyDelaunayTriangulation();
+        void ConstructUniformRandomVector();
+        void GeneratePointsForDelaunay();
         void OneIterationFitModele();
 
     private:
@@ -47,10 +53,12 @@ namespace MMVII
 
         // ==    Optionnal args ====
         bool mShow; // print result, export image ...
+        int mNumberPointsToGenerate;	 // number of generated points
+		int mRandomUniformLawUpperBound; // Uniform law generate numbers from [0, mRandomUniformLawUpperBound [
 
         // ==    Internal variables ====
-        std::vector<cPt2dr> mVPtsMod;  ///<  points sampling the model.
-        std::vector<double> mValueMod; ///<  values of points in mVPtsMod.
+        // std::vector<cPt2dr> mVPtsMod;  ///<  points sampling the model.
+        // std::vector<double> mValueMod; ///<  values of points in mVPtsMod.
 
         cPt2di mSzImPre; ///<  size of image.
         tIm mImPre;      ///<  memory representation of the image.
@@ -59,6 +67,9 @@ namespace MMVII
         cPt2di mSzImPost; ///<  size of image.
         tIm mImPost;      ///<  memory representation of the image.
         tDIm &mDImPost;   ///<  memory representation of the image.
+
+        std::vector<cPt2dr> mVectorPts; // A vector containing a set of points
+        cTriangulation2D<tREAL8> mDelTri; // A Delaunay triangle
 
         cResolSysNonLinear<tREAL8> *mSys; ///< Non Linear Sys for solving problem.
         cCalculator<double> *mEqHomTri;   ///< calculator giving access to values and derivatives.
@@ -73,6 +84,8 @@ namespace MMVII
                                                                                               mSzImPost(cPt2di(1, 1)),
                                                                                               mImPost(mSzImPost),
                                                                                               mDImPost(mImPost.DIm()),
+                                                                                              mVectorPts({cPt2dr(0, 0)}),
+                                                                                              mDelTri(mVectorPts),
                                                                                               mSys(nullptr),
                                                                                               mEqHomTri(nullptr)
     {
@@ -93,7 +106,9 @@ namespace MMVII
     {
         return anArgObl
                << Arg2007(mNamePreImage, "Name of pre-image file.", {{eTA2007::FileImage}, {eTA2007::FileDirProj}})
-               << Arg2007(mNamePostImage, "Name of post-image file.", {{eTA2007::FileImage}, {eTA2007::FileDirProj}});
+               << Arg2007(mNamePostImage, "Name of post-image file.", {{eTA2007::FileImage}, {eTA2007::FileDirProj}})
+               << Arg2007(mNumberPointsToGenerate, "Number of points you want to generate for triangulation.")
+			   << Arg2007(mRandomUniformLawUpperBound, "Maximum value that the uniform law can draw from.");
     }
 
     cCollecSpecArg2007 &cAppli_cTriangleDeformation::ArgOpt(cCollecSpecArg2007 &anArgOpt)
@@ -103,12 +118,67 @@ namespace MMVII
                << AOpt2007(mShow, "Show", "Whether to print result", {eTA2007::HDV});
     }
 
+	void cAppli_cTriangleDeformation::ComputeMinimumDistanceToCircle(const cTriangle<tREAL8, 2> & aTri)
+	{
+			// Compute center circle circum
+			const cPt2dr aC = aTri.CenterInscribedCircle();
+			// Compute min dist to this circle
+			double aMinDist = 1e20;
+			for (const auto &aPt : mVectorPts)
+				aMinDist = std::min(aMinDist, Norm2(aC - aPt));
+			// This  min dist must be (almost) equal to circum-radius
+			const double aRadiusCircum = Norm2(aC - aTri.Pt(0));
+			const double aDif = std::abs(aRadiusCircum - aMinDist);
+			MMVII_INTERNAL_ASSERT_bench(aDif < 1e-5, "Inscribed circle property in Delaunay");
+	}
+
+	void cAppli_cTriangleDeformation::BuildTrianglesAndApplyDelaunayTriangulation()
+	{
+		cTriangulation2D<tREAL8> mDelTri(mVectorPts);
+
+		mDelTri.MakeDelaunay();
+
+		// Loop over all triangle
+		for (size_t aKt = 0; aKt < mDelTri.NbFace(); aKt++)
+		{
+			const cTriangle<tREAL8, 2> aTri = mDelTri.KthTri(aKt);
+			ComputeMinimumDistanceToCircle(aTri);
+		}
+	}
+
+	void cAppli_cTriangleDeformation::ConstructUniformRandomVector()
+	{
+		// Generate coordinates from drawing lines and columns of coordinates from a uniform distribution
+		for (int aNbPt = 0; aNbPt < mNumberPointsToGenerate; aNbPt++)
+		{
+			const double aUniformRandomLine = RandUnif_N(mRandomUniformLawUpperBound);
+			const double aUniformRandomCol = RandUnif_N(mRandomUniformLawUpperBound);
+			const cPt2dr aUniformRandomPt(aUniformRandomLine, aUniformRandomCol);
+			mVectorPts.push_back(aUniformRandomPt);
+		}
+	}
+
+	void cAppli_cTriangleDeformation::GeneratePointsForDelaunay()
+	{
+		const int aMinimumLinCol = std::min(mSzImPre.y(), mSzImPre.x());
+
+		// make sure that values greater than image size can't be drawn from uniform law.
+		while (mRandomUniformLawUpperBound >= aMinimumLinCol)
+		{
+			StdOut() << "Maximum value drawn from uniform law needs to be smaller than " << aMinimumLinCol << "." << std::endl;
+			std::cin >> mRandomUniformLawUpperBound;
+		}
+		ConstructUniformRandomVector();
+
+		BuildTrianglesAndApplyDelaunayTriangulation(); // Apply Delaunay triangulation on generated points.
+	}
+
     void cAppli_cTriangleDeformation::OneIterationFitModele()
     {
         //----------- index of unkown, basic here because the unknown are the same for each equation
-        std::vector<int> aVecInd{0, 1, 2};
+        std::vector<int> aVecInd{0, 1, 2, 3, 4, 5};
         //----------- allocate vec of obs :
-        std::vector<double> aVObs(4, 0.0);
+        std::vector<double> aVObs(5, 0.0);
 
         //----------- extract current parameters
         cDenseVect<double> aVCur = mSys->CurGlobSol();
@@ -117,53 +187,56 @@ namespace MMVII
         // double aCurTrR = aVCur(0);                                         // current translation on radiometry
 
         //----------- declaration of indicator of convergence
-        double aSomDif = 0; // sum of difference between model and image
-        double aSomMod = 0; // sum of value of model, to normalize the difference
+        // double aSomDif = 0; // sum of difference between model and image
+        // double aSomMod = 0; // sum of value of model, to normalize the difference
         double aNbOut = 0;  // number of points out of image
 
         // Parse all the point to add the observations on each point
-        for (size_t aKPt = 0; aKPt < mVPtsMod.size(); aKPt++)
+        for (size_t aTr = 0; aTr < mDelTri.NbFace(); aTr++)
         {
-            cPt2dr aPMod = mVPtsMod[aKPt];         // point of model
-            cPt2dr aPIm = aCurHomM2I.Value(aPMod); // image of aPMod by current homotethy
-            if (mDImPre.InsideBL(aPIm))             // avoid error
+            const cTriangle<tREAL8, 2> aTri = mDelTri.KthTri(aTr);
+            // cPt2dr aPMod = mVPtsMod[aKPt];         // point of model
+            // cPt2dr aPIm = aCurHomM2I.Value(aPMod); // image of aPMod by current homotethy
+            // put observations in vectors
+            //  observations on image and point-image
+            // Set_FormalBilinIm2D_Obs(aVObs, 0, aPIm, mDIm);
+            for (int aKnot=0; aKnot < 3; aKnot++)
             {
-                // put observations in vectors
-                //  observations on image and point-image
-                // Set_FormalBilinIm2D_Obs(aVObs, 0, aPIm, mDIm);
-                Set_TriangleDeform_Obs(aVObs, 0, aPIm, mDImPre, mDImPost);
+                if (mDImPre.InsideBL(aTri.Pt(aKnot)))             // avoid error
+                {
+                    FormalBilinIm2D_SetObs(aVObs, 0, aTri.Pt(aKnot), mDImPre);
+                    
+                    // Now add observation
+                    mSys->CalcAndAddObs(mEqHomTri, aVecInd, aVObs);
+/*
+                    double aDif = mDImPre.GetVBL(aTri.Pt(aKnot)) - (mValueMod[aKPt]); // residual
+                    aSomMod += mValueMod[aKPt];
+                    aSomDif += std::abs(aDif);
+                    */
+                }
+                else
+                    aNbOut++;
+                // Set_TriangleDeform_Obs(aVObs, 0, aPIm, mDImPre, mDImPost);
 
                 //  observation point model and value model
+                /*
                 aVObs[6] = aPMod.x();
                 aVObs[7] = aPMod.y();
                 aVObs[8] = mValueMod[aKPt];
-
-                // Now add observation
-                mSys->CalcAndAddObs(mEqHomTri, aVecInd, aVObs);
+                */
 
                 // compute indicator
                 // double aDif = mDImIn.GetVBL(aPIm) - (aCurTrR + mValueMod[aKPt]); // residual
-                double aDif = mDImPre.GetVBL(aPIm) - (mValueMod[aKPt]); // residual
-                aSomMod += mValueMod[aKPt];
-                aSomDif += std::abs(aDif);
             }
-            else
-                aNbOut++;
+            
         }
 
         // Update all parameter taking into account previous observation
         mSys->SolveUpdateReset();
-
+        /*
         if (mShow)
             StdOut() << " Dif= " << aSomDif / aSomMod << " NbOut=" << aNbOut << std::endl;
-        /*
-        //  If we are at end, check that the model is equal (up to numerical accuracy)  to the target
-        if (IsLast)
-        {
-            MMVII_INTERNAL_ASSERT_bench(aNbOut == 0, "Gauss compos");
-            MMVII_INTERNAL_ASSERT_bench((aSomDif / aSomMod) < 1e-10, "Gauss compos");
-        }
-        */
+            */
     }
 
     int cAppli_cTriangleDeformation::Exe()
@@ -173,8 +246,6 @@ namespace MMVII
 
         // mDImIn = &mImIn.DIm();
         // mSz = mDImIn->Sz();
-
-        // cAppli_cTriangleDeformation aTriangleDeform(); // not thinking object this isn't great.
 
         const int aNbIters = 8;
         for (int aIter = 0; aIter < aNbIters; aIter++)
@@ -186,16 +257,6 @@ namespace MMVII
     /********************************************/
     /*              ::MMVII                     */
     /********************************************/
-    /*
-    void ComputeTriangleDeformation()
-    {
-        cPt2di SizeOfImage = {500, 300};
-        cAppli_cTriangleDeformation aTriangleDeform(false, SizeOfImage);
-        int aNbIters = 8;
-        for (int aIter = 0; aIter < aNbIters; aIter++)
-            aTriangleDeform.OneIterationFitModele(aIter == (aNbIters - 1));
-    }
-    */
 
     tMMVII_UnikPApli Alloc_cTriangleDeformation(const std::vector<std::string> &aVArgs, const cSpecMMVII_Appli &aSpec)
     {
