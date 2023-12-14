@@ -42,6 +42,7 @@ namespace MMVII
                   + I01  * (X1-X) * (Y-Y0)
                   + I11  * (X-X0) * (Y-Y0)
 
+
      In this function the value  X0, Y0,  I00, I10, I01, I11  are communicated as element
      of the observation vector aVObs, starting from aKObs0.
     **/
