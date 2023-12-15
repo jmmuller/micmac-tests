@@ -65,7 +65,7 @@ std::string  NameEqDist(const cPt3di & aDeg,bool WithDerive,bool ForBase,bool is
    cMMVIIUnivDist aDist(aDeg.x(),aDeg.y(),aDeg.z(),ForBase,isFraserMode);
    cEqDist<cMMVIIUnivDist> anEq(aDist); 
 
-        return NameFormula(anEq, WithDerive);
+        return NameFormula(anEq,WithDerive);
     }
 
 template <typename tProj> std::string Tpl_NameEqColinearityCamPPC(eProjPC  aType,const cPt3di & aDeg,bool WithDerive,bool isFraserMode)
@@ -75,7 +75,7 @@ template <typename tProj> std::string Tpl_NameEqColinearityCamPPC(eProjPC  aType
    cMMVIIUnivDist aDist(aDeg.x(),aDeg.y(),aDeg.z(),false,isFraserMode);
    cEqColinearityCamPPC<cMMVIIUnivDist,tProj>  anEq(aDist);
 
-        return NameFormula(anEq, WithDerive);
+        return NameFormula(anEq,WithDerive);
     }
 
 std::string NameEqColinearityCamPPC(eProjPC  aType,const cPt3di & aDeg,bool WithDerive,bool isFraserMode)
@@ -89,8 +89,9 @@ std::string NameEqColinearityCamPPC(eProjPC  aType,const cPt3di & aDeg,bool With
         case eProjPC::eOrthoGraphik   :   return Tpl_NameEqColinearityCamPPC<cProjOrthoGraphic>  (aType,aDeg,WithDerive,isFraserMode);
         case eProjPC::eEquiRect       :   return Tpl_NameEqColinearityCamPPC<cProj_EquiRect>     (aType,aDeg,WithDerive,isFraserMode);
 
-        default:;
-        };
+            default :;
+
+        }    ;
 
         MMVII_INTERNAL_ERROR("Unhandled proj in NameEqProjCam");
         return "";
