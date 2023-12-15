@@ -17,7 +17,7 @@ cBA_BlocRig::cBA_BlocRig
     mAllPair (false),
     mEqBlUK  (EqBlocRig(true,1,true)),  // get the class computing rigidity equation,  true=with derivative , true=reuse
     mSigmaRat (aSigmaRat),
-    mEqRatt  (aSigmaRat.empty() ? nullptr : EqBlocRig(true,1,true))
+    mEqRatt  (aSigmaRat.empty() ? nullptr : EqBlocRig_RatE(true,1,true))
 {
     // push the weigth for the 3 equation on centers
     for (int aK=0 ; aK<3 ; aK++)
