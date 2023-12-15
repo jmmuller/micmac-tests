@@ -4,8 +4,8 @@
 #include "MMVII_Geom2D.h"
 
 #include "MMVII_PhgrDist.h"
-#include "MMVII_TplSymbImage.h"
-// #include "MMVII_TplSymbTriangle.h"
+
+#include "MMVII_TplSymbTriangle.h"
 
 using namespace NS_SymbolicDerivative;
 
@@ -200,12 +200,16 @@ namespace MMVII
             // put observations in vectors
             //  observations on image and point-image
             // Set_FormalBilinIm2D_Obs(aVObs, 0, aPIm, mDIm);
+            const cTriangle2DCompiled aCompTri(aTri);
+            std::vector<cPt2di> aVectorToFillWithInsidePixels;
+		    aCompTri.PixelsInside(aVectorToFillWithInsidePixels);
+
             for (int aKnot=0; aKnot < 3; aKnot++)
             {
                 if (mDImPre.InsideBL(aTri.Pt(aKnot)))             // avoid error
                 {
-                    FormalBilinIm2D_SetObs(aVObs, 0, aTri.Pt(aKnot), mDImPre);
-                    
+                    FormalBilinTri_SetObs(aVObs, 0, aTri.Pt(aKnot), mDImPre);
+
                     // Now add observation
                     mSys->CalcAndAddObs(mEqHomTri, aVecInd, aVObs);
 /*
