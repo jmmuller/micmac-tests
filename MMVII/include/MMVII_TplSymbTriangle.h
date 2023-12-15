@@ -43,9 +43,8 @@ namespace MMVII
 
 
  */
-/*
     template <class TypeFunc, class TypeObs>
-    TypeFunc FormalBilinIm2D_Formula(
+    TypeFunc FormalBilinTri_Formula(
         const std::vector<TypeObs> &aVObs,
         int aKObs0,
         const TypeFunc &FX,
@@ -65,16 +64,16 @@ namespace MMVII
                + aWX0 * aWY1 * aVObs.at(aKObs0 + 4)  // I01
                + aWX1 * aWY1 * aVObs.at(aKObs0 + 5); // I11
     }
-*/
+
     /**  standard name for observation */
     //std::vector<std::string> FormalBilinIm2D_NameObs(const std::string &aPrefix);
 
     /**  This is the "companion" function of  FormalBilinIm2D_Formula, it fill
          the vector aVObs with X0,Y0,I00,   that will be used in FormalBilinIm2D_Formula.
      */
-/*
+
     template <class Type, class TypeIm>
-    void FormalBilinIm2D_SetObs(
+    void FormalBilinTri_SetObs(
         std::vector<Type> &aVObs,     // vector of observation to fill with [X0,Y0,I00...]
         size_t aK0,                   // first index where fill the vector
         cPt2dr aPtIm,                 // point in image
@@ -94,7 +93,7 @@ namespace MMVII
         SetOrPush(aVObs, aK0 + 4, (Type)aDIm.GetV(aP0 + cPt2di(0, 1)));
         SetOrPush(aVObs, aK0 + 5, (Type)aDIm.GetV(aP0 + cPt2di(1, 1)));
     }
-*/
+
     template <class TypeFunc, class TypeObs>
     TypeFunc Apply_TriangleMeshDisplacement_Formula(
         const std::vector<TypeObs> &aVObs,
@@ -143,7 +142,7 @@ namespace MMVII
         // SetOrPush(aVObs, aK0 + 3, (Type)aDImPost.GetV(aP0));
     }
 
-    constexpr size_t TriangleDisplacement_NbObs = 2;
+    constexpr size_t TriangleDisplacement_NbObs = 5;
 };
 
 #endif //  _MMVII_TplSymbTriangle_

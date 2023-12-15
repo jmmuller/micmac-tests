@@ -2,6 +2,7 @@
 #define _FORMULA_TRIANGLES_DEFORM_H_
 
 #include "MMVII_TplSymbTriangle.h"
+// #include "MMVII_TplSymbImage.h"
 // #include "MMVII_util_tpl.h"
 
 #include "SymbDer/SymbolicDerivatives.h"
@@ -44,7 +45,7 @@ namespace MMVII
       const auto &AlphaCoordinates = aVObs[IndX + 2];
       const auto &BetaCoordinates = aVObs[IndX + 3];
       const auto &GammaCoordinates = aVObs[IndX + 4];
-      const auto &vModelInit = aVObs[IndX + 5];
+      // const auto &vModelInit = aVObs[IndX + 5];
 
       // extract unknowns
       // const auto &aRadSc = aVUk[0];
@@ -63,7 +64,8 @@ namespace MMVII
       auto yTri = YCoordinates + AlphaCoordinates * aGeomTrYPointA + BetaCoordinates * aGeomTrYPointB + GammaCoordinates * aGeomTrYPointC;
 
       // compute formula of bilinear interpolation
-      auto aValueTri = Apply_TriangleMeshDisplacement_Formula(aVObs, IndTri, xTri, yTri);
+      // auto aValueTri = Apply_TriangleMeshDisplacement_Formula(aVObs, IndTri, xTri, yTri);
+      auto aValueTri = FormalBilinTri_Formula(aVObs, IndTri, xTri, yTri);
       // take into account radiometric transform
       // auto aValueModele = aRadTr + aRadSc * vModelInit;
       // auto aValueModele = vModelInit;
