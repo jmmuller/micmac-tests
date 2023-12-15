@@ -65,18 +65,18 @@ namespace MMVII
         cMMVIIUnivDist aDist(aDeg.x(), aDeg.y(), aDeg.z(), ForBase, isFraserMode);
         cEqDist<cMMVIIUnivDist> anEq(aDist);
 
-        return NameFormula(anEq, WithDerive);
+        return NameFormula(anEq,WithDerive);
     }
 
     template <typename tProj>
     std::string Tpl_NameEqColinearityCamPPC(eProjPC aType, const cPt3di &aDeg, bool WithDerive, bool isFraserMode)
     {
-        MMVII_INTERNAL_ASSERT_tiny(tProj::TypeProj() == aType, "incoherence in Tpl_NameEqProjCam");
+        MMVII_INTERNAL_ASSERT_tiny(tProj::TypeProj()==aType,"incoherence in Tpl_NameEqProjCam");
 
         cMMVIIUnivDist aDist(aDeg.x(), aDeg.y(), aDeg.z(), false, isFraserMode);
         cEqColinearityCamPPC<cMMVIIUnivDist, tProj> anEq(aDist);
 
-        return NameFormula(anEq, WithDerive);
+        return NameFormula(anEq,WithDerive);
     }
 
     std::string NameEqColinearityCamPPC(eProjPC aType, const cPt3di &aDeg, bool WithDerive, bool isFraserMode)
@@ -96,8 +96,9 @@ namespace MMVII
         case eProjPC::eEquiRect:
             return Tpl_NameEqColinearityCamPPC<cProj_EquiRect>(aType, aDeg, WithDerive, isFraserMode);
 
-        default:;
-        };
+            default :;
+
+        }    ;
 
         MMVII_INTERNAL_ERROR("Unhandled proj in NameEqProjCam");
         return "";
