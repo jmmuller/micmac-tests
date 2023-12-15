@@ -645,6 +645,7 @@ namespace MMVII
             GenCodesFormula((tREAL8 *)nullptr, cTopoSubFrame(), WithDer);
 
             GenCodesFormula((tREAL8 *)nullptr, cDeformImHomotethy(), WithDer);
+            GenCodesFormula((tREAL8 *)nullptr, cTriangleDeformation(), WithDer); // ajout ici
 
             GenCodesFormula((tREAL8 *)nullptr, cRadiomVignettageLinear(5), WithDer);
             std::vector<int> aVDegSens{5};
