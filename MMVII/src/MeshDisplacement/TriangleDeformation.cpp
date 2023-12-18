@@ -1,7 +1,7 @@
 #include "cMMVII_Appli.h"
 // #include "MMVII_enums.h"
 // #include "MMVII_Image2D.h"
-#include "MMVII_Geom2D.h"
+// #include "MMVII_Geom2D.h"
 
 #include "MMVII_PhgrDist.h"
 
@@ -178,11 +178,11 @@ namespace MMVII
         //----------- index of unkown, basic here because the unknown are the same for each equation
         std::vector<int> aVecInd{0, 1, 2, 3, 4, 5};
         //----------- allocate vec of obs :
-        std::vector<double> aVObs(5, 0.0);
+        std::vector<double> aVObs(12, 0.0); // 6 for ImagePost interpolation and 6 for ImagePre
 
         //----------- extract current parameters
         cDenseVect<double> aVCur = mSys->CurGlobSol();
-        cHomot2D<tREAL8> aCurHomM2I(cPt2dr(aVCur(3), aVCur(4)), aVCur(2));    // current homothety
+        // cHomot2D<tREAL8> aCurHomM2I(cPt2dr(aVCur(3), aVCur(4)), aVCur(2));    // current homothety
         // double aCurScR = aVCur(0);                                         // current scale on radiometry
         // double aCurTrR = aVCur(0);                                         // current translation on radiometry
 
@@ -204,11 +204,11 @@ namespace MMVII
             std::vector<cPt2di> aVectorToFillWithInsidePixels;
 		    aCompTri.PixelsInside(aVectorToFillWithInsidePixels);
 
-            for (int aKnot=0; aKnot < 3; aKnot++)
+            for (long unsigned int aFilledPixel=0; aFilledPixel < aVectorToFillWithInsidePixels.size(); aFilledPixel++)
             {
-                if (mDImPre.InsideBL(aTri.Pt(aKnot)))             // avoid error
+                if (mDImPre.InsideBL(aCompTri.Pt(aFilledPixel)))             // avoid error
                 {
-                    FormalBilinTri_SetObs(aVObs, 0, aTri.Pt(aKnot), mDImPre);
+                    FormalInterpBarycenter_SetObs(aVObs, 0, aCompTri, aVectorToFillWithInsidePixels, aFilledPixel, mDImPre);
 
                     // Now add observation
                     mSys->CalcAndAddObs(mEqHomTri, aVecInd, aVObs);

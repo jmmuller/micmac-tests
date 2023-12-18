@@ -3,7 +3,7 @@
 
 #include "MMVII_TplSymbTriangle.h"
 // #include "MMVII_TplSymbImage.h"
-// #include "MMVII_util_tpl.h"
+#include "MMVII_util_tpl.h"
 
 #include "SymbDer/SymbolicDerivatives.h"
 #include "SymbDer/SymbDer_MACRO.h"
@@ -26,8 +26,15 @@ namespace MMVII
     }
 
     static const std::vector<std::string> VNamesUnknowns() { return {"GeomTrXPointA", "GeomTrYPointA", "GeomTrXPointB", "GeomTrYPointB", "GeomTrXPointC", "GeomTrYPointC"}; }
-    static const std::vector<std::string> VNamesObs() { return {"PixelCoordinatesX", "PixelCoordinatesY", "AlphaCoordPixel", "BetaCoordPixel", "GammaCoordPixel"};}
-                                                              // , "IntensityPreIm", "IntensityPostIm", }; }
+    static const std::vector<std::string> VNamesObs() 
+    {
+      return Append
+                  (
+                    std::vector<std::string>{"PixelCoordinatesX", "PixelCoordinatesY", "AlphaCoordPixel", "BetaCoordPixel", "GammaCoordPixel", "IntensityImPre"},
+                    FormalBilinIm2D_NameObs("T")  // 6 obs for bilinear interpol of Im
+                     // std::vector<std::string>{"xMod","yMod","ValueMod"} // x,y of point, value of modele
+                  );
+    }
 
     std::string FormulaName() const { return "TriangleDeformation"; }
 
@@ -40,12 +47,12 @@ namespace MMVII
       size_t IndX = TriangleDisplacement_NbObs + IndTri;
 
       // extract observation on model
-      const auto &XCoordinates = aVObs[IndX];
-      const auto &YCoordinates = aVObs[IndX + 1];
-      const auto &AlphaCoordinates = aVObs[IndX + 2];
-      const auto &BetaCoordinates = aVObs[IndX + 3];
-      const auto &GammaCoordinates = aVObs[IndX + 4];
-      // const auto &vModelInit = aVObs[IndX + 5];
+      const auto &aXCoordinates = aVObs[IndX];
+      const auto &aYCoordinates = aVObs[IndX + 1];
+      const auto &aAlphaCoordinates = aVObs[IndX + 2];
+      const auto &aBetaCoordinates = aVObs[IndX + 3];
+      const auto &aGammaCoordinates = aVObs[IndX + 4];
+      const auto &aIntensityImPre = aVObs[IndX + 5];
 
       // extract unknowns
       // const auto &aRadSc = aVUk[0];
@@ -60,18 +67,18 @@ namespace MMVII
 
       // auto xIm = aGeomTrx + aGeomScale * xModele;
       // auto yIm = aGeomTry + aGeomScale * yModele;
-      auto xTri = XCoordinates + AlphaCoordinates * aGeomTrXPointA + BetaCoordinates * aGeomTrXPointB + GammaCoordinates * aGeomTrXPointC;
-      auto yTri = YCoordinates + AlphaCoordinates * aGeomTrYPointA + BetaCoordinates * aGeomTrYPointB + GammaCoordinates * aGeomTrYPointC;
+      auto aXTri = aXCoordinates + aAlphaCoordinates * aGeomTrXPointA + aBetaCoordinates * aGeomTrXPointB + aGammaCoordinates * aGeomTrXPointC;
+      auto aYTri = aYCoordinates + aAlphaCoordinates * aGeomTrYPointA + aBetaCoordinates * aGeomTrYPointB + aGammaCoordinates * aGeomTrYPointC;
 
       // compute formula of bilinear interpolation
       // auto aValueTri = Apply_TriangleMeshDisplacement_Formula(aVObs, IndTri, xTri, yTri);
-      auto aValueTri = FormalBilinTri_Formula(aVObs, IndTri, xTri, yTri);
+      auto aEstimatedValueTri = FormalBilinTri_Formula(aVObs, IndTri, aXTri, aYTri);
       // take into account radiometric transform
       // auto aValueModele = aRadTr + aRadSc * vModelInit;
       // auto aValueModele = vModelInit;
 
       // residual is simply the difference between both values
-      return {aValueTri};
+      return {aEstimatedValueTri - aIntensityImPre};
     }
   };
 
