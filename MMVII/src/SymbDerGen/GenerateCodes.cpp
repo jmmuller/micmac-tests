@@ -497,8 +497,9 @@ namespace MMVII
         template <typename tProj>
         void GenerateCodeCamPerpCentrale(const cPt3di &, bool IsFraserMode);
 
-        eProjPC mTypeProj;
-    };
+
+	eProjPC  mTypeProj;
+};
 
     cAppliGenCode::cAppliGenCode(
         const std::vector<std::string> &aVArgs,
