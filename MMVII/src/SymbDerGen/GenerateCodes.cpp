@@ -265,7 +265,7 @@ namespace MMVII
         return StdAllocCalc(NameFormula(cDeformImHomotethy(), WithDerive), aSzBuf);
     }
 
-    cCalculator<double> *EqDeformTriHomothety(bool WithDerive, int aSzBuf) // addition here
+    cCalculator<double> *EqDeformTriAffinity(bool WithDerive, int aSzBuf) // addition here
     {
         return StdAllocCalc(NameFormula(cTriangleDeformation(), WithDerive), aSzBuf);
     }
@@ -401,6 +401,7 @@ cCalculator<double> * EqSumSquare(int aNb,bool WithDerive,int aSzBuf,bool ReUse)
                 aK++;
             }
         }
+
         std::vector<double> aV00{0, 0};
         cPt3dr aPtZ = cPt3dr::FromStdVector(TyProj::ToDirBundle(aV00));
         MMVII_INTERNAL_ASSERT_bench(Norm2(aPtZ - AxeK) < 1e-8, "Proj/ToDirBundle");
@@ -489,7 +490,7 @@ cCalculator<double> * EqSumSquare(int aNb,bool WithDerive,int aSzBuf,bool ReUse)
         cAppliBenchAnswer BenchAnswer() const override; ///< Has it a bench, default : no
         int ExecuteBench(cParamExeBench &) override;
 
-        /// tCompute is a fake paremeter, it'used to force the value
+        /// tCompute is a fake parameter, it's used to force the value
         template <typename tDist, typename tCompute>
         void GenCodesFormula(tCompute *, const tDist &aDist, bool WithDerive);
 
