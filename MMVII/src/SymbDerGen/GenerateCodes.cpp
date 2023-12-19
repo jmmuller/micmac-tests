@@ -265,7 +265,7 @@ namespace MMVII
         return StdAllocCalc(NameFormula(cDeformImHomotethy(), WithDerive), aSzBuf);
     }
 
-    cCalculator<double> *EqDeformTriHomothety(bool WithDerive, int aSzBuf) // addition here
+    cCalculator<double> *EqDeformTriAffinity(bool WithDerive, int aSzBuf) // addition here
     {
         return StdAllocCalc(NameFormula(cTriangleDeformation(), WithDerive), aSzBuf);
     }
