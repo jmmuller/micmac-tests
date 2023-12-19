@@ -93,7 +93,7 @@ namespace MMVII
         aVInit(0) = 0;
         aVInit(1) = 0;
         mSys = new cResolSysNonLinear<tREAL8>(eModeSSR::eSSR_LsqDense, aVInit);
-        mEqHomTri = EqDeformTriHomothety(true, 1); // true-> with derivative,  1=sz of buffer
+        mEqHomTri = EqDeformTriAffinity(true, 1); // true-> with derivative,  1=sz of buffer
     }
 
     cAppli_cTriangleDeformation::~cAppli_cTriangleDeformation()
