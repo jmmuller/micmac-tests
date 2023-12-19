@@ -163,7 +163,7 @@ NS_SymbolicDerivative::cCalculator<double> * EqBlocRig_RatE(bool WithDerive,int 
     /// Equation used to optimize homothetic transform between model and image (used as a tutorial for deformable model)
     NS_SymbolicDerivative::cCalculator<double> *EqDeformImHomotethy(bool WithDerive, int aSzBuf);
     /// Equation used to optimize homothetic transform between model and triangle.
-    NS_SymbolicDerivative::cCalculator<double> *EqDeformTriHomothety(bool WithDerive, int aSzBuf); // change here
+    NS_SymbolicDerivative::cCalculator<double> *EqDeformTriAffinity(bool WithDerive, int aSzBuf); // change here
 
     // .............   Covariance propagation  .............
 
