@@ -49,9 +49,9 @@ namespace MMVII
       // extract observation on model
       const auto &aXCoordinates = aVObs[IndX];
       const auto &aYCoordinates = aVObs[IndX + 1];
-      const auto &aAlphaCoordinates = aVObs[IndX + 2];
-      const auto &aBetaCoordinates = aVObs[IndX + 3];
-      const auto &aGammaCoordinates = aVObs[IndX + 4];
+      const auto &aAlphaCoordinate = aVObs[IndX + 2];
+      const auto &aBetaCoordinate = aVObs[IndX + 3];
+      const auto &aGammaCoordinate = aVObs[IndX + 4];
       const auto &aIntensityImPre = aVObs[IndX + 5];
 
       // extract unknowns
@@ -67,11 +67,11 @@ namespace MMVII
 
       // auto xIm = aGeomTrx + aGeomScale * xModele;
       // auto yIm = aGeomTry + aGeomScale * yModele;
-      auto aXTri = aXCoordinates + aAlphaCoordinates * aGeomTrXPointA + aBetaCoordinates * aGeomTrXPointB + aGammaCoordinates * aGeomTrXPointC;
-      auto aYTri = aYCoordinates + aAlphaCoordinates * aGeomTrYPointA + aBetaCoordinates * aGeomTrYPointB + aGammaCoordinates * aGeomTrYPointC;
+      auto aXTri = aXCoordinates + aAlphaCoordinate * aGeomTrXPointA + aBetaCoordinate * aGeomTrXPointB + aGammaCoordinate * aGeomTrXPointC;
+      auto aYTri = aYCoordinates + aAlphaCoordinate * aGeomTrYPointA + aBetaCoordinate * aGeomTrYPointB + aGammaCoordinate * aGeomTrYPointC;
 
       // compute formula of bilinear interpolation
-      // auto aValueTri = Apply_TriangleMeshDisplacement_Formula(aVObs, IndTri, xTri, yTri);
+
       auto aEstimatedValueTri = FormalBilinTri_Formula(aVObs, IndTri, aXTri, aYTri);
       // take into account radiometric transform
       // auto aValueModele = aRadTr + aRadSc * vModelInit;
