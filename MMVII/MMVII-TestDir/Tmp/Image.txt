@@ -1,0 +1,4 @@
+"MMVII_Serialization"
+"0.0.0"
+4 2
+4E759E2CC5A0C824
