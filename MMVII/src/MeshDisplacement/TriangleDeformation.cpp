@@ -1,7 +1,7 @@
 #include "cMMVII_Appli.h"
 // #include "MMVII_enums.h"
-// #include "MMVII_Image2D.h"
-// #include "MMVII_Geom2D.h"
+#include "MMVII_Image2D.h"
+#include "MMVII_Geom2D.h"
 
 #include "MMVII_PhgrDist.h"
 
@@ -40,9 +40,10 @@ namespace MMVII
         cCollecSpecArg2007 &ArgOpt(cCollecSpecArg2007 &anArgOpt) override;
 
     
-        void ComputeMinimumDistanceToCircle(const cTriangle<tREAL8, 2> & aTri);
-        void BuildTrianglesAndApplyDelaunayTriangulation();
-        void ConstructUniformRandomVector();
+        // void ComputeMinimumDistanceToCircle(const cTriangle<tREAL8, 2> & aTri);
+        // void BuildTrianglesAndApplyDelaunayTriangulation();
+        // void ConstructUniformRandomVector();
+        void ConstructUniformRandomVectorAndApplyDelaunay();
         void GeneratePointsForDelaunay();
         void OneIterationFitModele();
 
@@ -89,9 +90,15 @@ namespace MMVII
                                                                                               mSys(nullptr),
                                                                                               mEqHomTri(nullptr)
     {
-        cDenseVect<double> aVInit(2);
+        cDenseVect<double> aVInit(6);
+
         aVInit(0) = 0;
         aVInit(1) = 0;
+        aVInit(2) = 0;
+        aVInit(3) = 0;
+        aVInit(4) = 0;
+        aVInit(5) = 0;
+
         mSys = new cResolSysNonLinear<tREAL8>(eModeSSR::eSSR_LsqDense, aVInit);
         mEqHomTri = EqDeformTriAffinity(true, 1); // true-> with derivative,  1=sz of buffer
     }
@@ -106,7 +113,7 @@ namespace MMVII
     {
         return anArgObl
                << Arg2007(mNamePreImage, "Name of pre-image file.", {{eTA2007::FileImage}, {eTA2007::FileDirProj}})
-               << Arg2007(mNamePostImage, "Name of post-image file.", {{eTA2007::FileImage}, {eTA2007::FileDirProj}})
+               << Arg2007(mNamePostImage, "Name of post-image file.", {eTA2007::FileImage})
                << Arg2007(mNumberPointsToGenerate, "Number of points you want to generate for triangulation.")
 			   << Arg2007(mRandomUniformLawUpperBound, "Maximum value that the uniform law can draw from.");
     }
@@ -117,7 +124,7 @@ namespace MMVII
         return anArgOpt
                << AOpt2007(mShow, "Show", "Whether to print result", {eTA2007::HDV});
     }
-
+    /*
 	void cAppli_cTriangleDeformation::ComputeMinimumDistanceToCircle(const cTriangle<tREAL8, 2> & aTri)
 	{
 			// Compute center circle circum
@@ -134,10 +141,10 @@ namespace MMVII
 
 	void cAppli_cTriangleDeformation::BuildTrianglesAndApplyDelaunayTriangulation()
 	{
-		cTriangulation2D<tREAL8> mDelTri(mVectorPts);
+		mDelTri = mVectorPts;
 
 		mDelTri.MakeDelaunay();
-
+        
 		// Loop over all triangle
 		for (size_t aKt = 0; aKt < mDelTri.NbFace(); aKt++)
 		{
@@ -145,9 +152,10 @@ namespace MMVII
 			ComputeMinimumDistanceToCircle(aTri);
 		}
 	}
-
-	void cAppli_cTriangleDeformation::ConstructUniformRandomVector()
+    */
+	void cAppli_cTriangleDeformation::ConstructUniformRandomVectorAndApplyDelaunay()
 	{
+        mVectorPts.pop_back();
 		// Generate coordinates from drawing lines and columns of coordinates from a uniform distribution
 		for (int aNbPt = 0; aNbPt < mNumberPointsToGenerate; aNbPt++)
 		{
@@ -156,6 +164,9 @@ namespace MMVII
 			const cPt2dr aUniformRandomPt(aUniformRandomLine, aUniformRandomCol);
 			mVectorPts.push_back(aUniformRandomPt);
 		}
+        mDelTri = mVectorPts;
+
+		mDelTri.MakeDelaunay();
 	}
 
 	void cAppli_cTriangleDeformation::GeneratePointsForDelaunay()
@@ -168,9 +179,10 @@ namespace MMVII
 			StdOut() << "Maximum value drawn from uniform law needs to be smaller than " << aMinimumLinCol << "." << std::endl;
 			std::cin >> mRandomUniformLawUpperBound;
 		}
-		ConstructUniformRandomVector();
+		// ConstructUniformRandomVector();
+        ConstructUniformRandomVectorAndApplyDelaunay();
 
-		BuildTrianglesAndApplyDelaunayTriangulation(); // Apply Delaunay triangulation on generated points.
+		// BuildTrianglesAndApplyDelaunayTriangulation(); // Apply Delaunay triangulation on generated points.
 	}
 
     void cAppli_cTriangleDeformation::OneIterationFitModele()
@@ -178,13 +190,13 @@ namespace MMVII
         //----------- index of unkown, basic here because the unknown are the same for each equation
         std::vector<int> aVecInd{0, 1, 2, 3, 4, 5};
         //----------- allocate vec of obs :
-        std::vector<double> aVObs(12, 0.0); // 6 for ImagePost interpolation and 6 for ImagePre
+        std::vector<double> aVObs(12, 0.0); // 6 for ImagePre interpolation and 6 for ImagePost
 
         //----------- extract current parameters
         cDenseVect<double> aVCur = mSys->CurGlobSol();
-        // cHomot2D<tREAL8> aCurHomM2I(cPt2dr(aVCur(3), aVCur(4)), aVCur(2));    // current homothety
+        // cHomot2D<tREAL8> aCurTr(cPt2dr(aVCur(3), aVCur(4)), aVCur(2));    // current affine translation
         // double aCurScR = aVCur(0);                                         // current scale on radiometry
-        // double aCurTrR = aVCur(0);                                         // current translation on radiometry
+        // double aCurTrR = aVCur(1);                                         // current translation on radiometry
 
         //----------- declaration of indicator of convergence
         // double aSomDif = 0; // sum of difference between model and image
@@ -247,9 +259,14 @@ namespace MMVII
     {
         mImPre = tIm::FromFile(mNamePreImage);
         mImPost = tIm::FromFile(mNamePostImage);
+    
+        mDImPre = mImPre.DIm();
+        mSzImPre = mDImPre.Sz();
 
-        // mDImIn = &mImIn.DIm();
-        // mSz = mDImIn->Sz();
+        mDImPost = mImPost.DIm();
+        mSzImPost = mDImPost.Sz();
+
+        GeneratePointsForDelaunay();
 
         const int aNbIters = 8;
         for (int aIter = 0; aIter < aNbIters; aIter++)
