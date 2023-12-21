@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<Root>
+   <Type>"MMVII_Serialization"</Type>
+   <Version>"0.0.0"</Version>
+   <Data>
+      <SetCpleOfName>
+         <el>"a" "b"</el>
+         <el>"c" "d"</el>
+      </SetCpleOfName>
+   </Data>
+</Root>
