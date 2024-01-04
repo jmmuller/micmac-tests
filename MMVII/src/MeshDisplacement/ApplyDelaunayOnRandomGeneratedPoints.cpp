@@ -121,12 +121,12 @@ namespace MMVII
 		ShiftedTriangleCoordinates.push_back(aTri.Pt(0) + PercentDiffA);
 		ShiftedTriangleCoordinates.push_back(aTri.Pt(1) + PercentDiffB);
 		ShiftedTriangleCoordinates.push_back(aTri.Pt(2) + PercentDiffC);
-	
+
 		// Get pixels inside each triangle and shift them
 		std::vector<cPt2di> aVectorToFillwithInsidePixels;
 		aCompTri.PixelsInside(aVectorToFillwithInsidePixels);
 		for (long unsigned int filledPixel=0; filledPixel < aVectorToFillwithInsidePixels.size(); filledPixel++)
-		{					
+		{
 			if (filledPixel % 10 == 0)
 			{
 				const cPt2dr aFilledPoint(aVectorToFillwithInsidePixels[filledPixel].x(), aVectorToFillwithInsidePixels[filledPixel].y());

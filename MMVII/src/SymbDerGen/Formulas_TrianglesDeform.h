@@ -44,35 +44,39 @@ namespace MMVII
         const std::vector<tObs> &aVObs) // const
     {
       size_t IndTri = 0;
-      size_t IndX = TriangleDisplacement_NbObs + IndTri;
+      // size_t IndX = IndTri + TriangleDisplacement_NbObs;
 
       // extract observation on model
-      const auto &aXCoordinates = aVObs[IndX];
-      const auto &aYCoordinates = aVObs[IndX + 1];
-      const auto &aAlphaCoordinate = aVObs[IndX + 2];
-      const auto &aBetaCoordinate = aVObs[IndX + 3];
-      const auto &aGammaCoordinate = aVObs[IndX + 4];
-      const auto &aIntensityImPre = aVObs[IndX + 5];
+      /*
+      const auto &aXCoordinates = aVObs[IndTri];
+      const auto &aYCoordinates = aVObs[IndTri + 1];
+      const auto &aAlphaCoordinate = aVObs[IndTri + 2];
+      const auto &aBetaCoordinate = aVObs[IndTri + 3];
+      const auto &aGammaCoordinate = aVObs[IndTri + 4]; // change here
+      */
+      const auto &aIntensityImPre = aVObs[IndTri + 5];
+      const auto &aComputedXCoordinate = aVObs[IndTri + 6];
+      const auto &aComputedYCoordinate = aVObs[IndTri + 7];  // Only these variables are needed for application of bilinear formula.
 
       // extract unknowns
       // const auto &aRadSc = aVUk[0];
       // const auto &aRadTr = aVUk[0];
       // const auto &aGeomScale = aVUk[1];
-      const auto &aGeomTrXPointA = aVUk[0];
+      /*
+      const auto &aGeomTrXPointA = aVUk[0]; // change here
       const auto &aGeomTrYPointA = aVUk[1];
       const auto &aGeomTrXPointB = aVUk[2];
       const auto &aGeomTrYPointB = aVUk[3];
       const auto &aGeomTrXPointC = aVUk[4];
       const auto &aGeomTrYPointC = aVUk[5];
+      */
 
-      // auto xIm = aGeomTrx + aGeomScale * xModele;
-      // auto yIm = aGeomTry + aGeomScale * yModele;
-      auto aXTri = aXCoordinates + aAlphaCoordinate * aGeomTrXPointA + aBetaCoordinate * aGeomTrXPointB + aGammaCoordinate * aGeomTrXPointC;
-      auto aYTri = aYCoordinates + aAlphaCoordinate * aGeomTrYPointA + aBetaCoordinate * aGeomTrYPointB + aGammaCoordinate * aGeomTrYPointC;
+      // auto aXTri = aXCoordinates + aAlphaCoordinate * aGeomTrXPointA + aBetaCoordinate * aGeomTrXPointB + aGammaCoordinate * aGeomTrXPointC; // change
+      // auto aYTri = aYCoordinates + aAlphaCoordinate * aGeomTrYPointA + aBetaCoordinate * aGeomTrYPointB + aGammaCoordinate * aGeomTrYPointC; // change
 
       // compute formula of bilinear interpolation
 
-      auto aEstimatedValueTri = FormalBilinTri_Formula(aVObs, IndTri, aXTri, aYTri);
+      auto aEstimatedValueTri = FormalBilinTri_Formula(aVObs, TriangleDisplacement_NbObs, aComputedXCoordinate, aComputedYCoordinate);
       // take into account radiometric transform
       // auto aValueModele = aRadTr + aRadSc * vModelInit;
       // auto aValueModele = vModelInit;
