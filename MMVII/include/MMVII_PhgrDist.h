@@ -5,18 +5,18 @@
 
 namespace MMVII
 {
-/**  Indicate the nature of each coefficient of the distorsion
-*/
-enum class eTypeFuncDist
-           {
-              eRad,   ///<  Coefficient for radial distorsion 
-              eDecX,  ///< Coefficient for decentric distorsion x mean derived by Cx (it has X and Y components)
-              eDecY,  ///< Coefficient for decentric distorsion y mean derived by Cy (it has X and Y components)
-              eMonX,  ///< Coefficient for a monom in X, of the polynomial distorsion
-              eMonY,  ///< Coefficient for a monom in Y, of the polynomial distorsion
-              eMonom,   ///< Coefficient for a monom in X or Y, used for example in Radiom where there is no reason to sep X/Y
-              eNbVals ///< Tag for number of value
-           };
+    /**  Indicate the nature of each coefficient of the distorsion
+     */
+    enum class eTypeFuncDist
+    {
+        eRad,   ///<  Coefficient for radial distorsion
+        eDecX,  ///< Coefficient for decentric distorsion x mean derived by Cx (it has X and Y components)
+        eDecY,  ///< Coefficient for decentric distorsion y mean derived by Cy (it has X and Y components)
+        eMonX,  ///< Coefficient for a monom in X, of the polynomial distorsion
+        eMonY,  ///< Coefficient for a monom in Y, of the polynomial distorsion
+        eMonom, ///< Coefficient for a monom in X or Y, used for example in Radiom where there is no reason to sep X/Y
+        eNbVals ///< Tag for number of value
+    };
 
     /**  This class store a complete description of each parameters of the distorsion,
          it is used for computing the formula, the vector of name and (later) automatize
@@ -26,12 +26,12 @@ enum class eTypeFuncDist
      used of not according to the others, but as it internal/final classes, quick and dirty
      exceptionnaly allowed ...
 */
-class cDescOneFuncDist
-{
-    public :
-      cDescOneFuncDist(eTypeFuncDist aType,const cPt2di aDeg,bool isFraserMode);
-      /// Majorarion of norms of jacobian , used in simulation
-      double MajNormJacOfRho(double aRho) const;
+    class cDescOneFuncDist
+    {
+    public:
+        cDescOneFuncDist(eTypeFuncDist aType, const cPt2di aDeg, bool isFraserMode);
+        /// Majorarion of norms of jacobian , used in simulation
+        double MajNormJacOfRho(double aRho) const;
 
         eTypeFuncDist mType;   ///< Type of dist (Rad, DecX ....)
         std::string mName;     ///< Name : used as id for code gen & prety print
@@ -41,7 +41,7 @@ class cDescOneFuncDist
         int mDegTot;           ///< Total degree of the polynome
     };
 
-std::vector<cDescOneFuncDist>   DescDist(const cPt3di & aDeg,bool isFraserMode);
+    std::vector<cDescOneFuncDist> DescDist(const cPt3di &aDeg, bool isFraserMode);
 
     const std::vector<cDescOneFuncDist> &VDesc_RadiomCPI(int aDegree, int aDRadElim = -1);
 
@@ -52,32 +52,30 @@ std::vector<cDescOneFuncDist>   DescDist(const cPt3di & aDeg,bool isFraserMode);
     {
     public:
         typedef NS_SymbolicDerivative::cCalculator<double> tCalc;
-         cRandInvertibleDist
-        (
-              const cPt3di & aDeg,   ///< Degree of the distortio,
-              double aRhoMax,        ///< Radius on which it must be invertible
-              double aProbaNotNul,   ///< Probability for a coefficient to be not 0
-              double aTargetSomJac,   ///< Target majoration of jacobian
-              bool   isFraserMode
-       );
-       cDataNxNMapCalcSymbDer<double,2> *  MapDerSymb();
-       const std::vector<double> & VParam() const;  ///< Accessor to parameters
-       ~cRandInvertibleDist();
-       tCalc & EqVal();
-       tCalc & EqDer();
-   private :
-       cRandInvertibleDist(const cRandInvertibleDist &) = delete;
+        cRandInvertibleDist(
+            const cPt3di &aDeg,   ///< Degree of the distortio,
+            double aRhoMax,       ///< Radius on which it must be invertible
+            double aProbaNotNul,  ///< Probability for a coefficient to be not 0
+            double aTargetSomJac, ///< Target majoration of jacobian
+            bool isFraserMode);
+        cDataNxNMapCalcSymbDer<double, 2> *MapDerSymb();
+        const std::vector<double> &VParam() const; ///< Accessor to parameters
+        ~cRandInvertibleDist();
+        tCalc &EqVal();
+        tCalc &EqDer();
 
-       double                          mRhoMax;  
-       cPt3di                          mDeg;     ///< Degree of dist
-       std::vector<cDescOneFuncDist>   mVecDesc; ///< Vector of descriptor
-       tCalc *                         mEqVal;   ///< Calculator for values only
-       tCalc *                         mEqDer;   ///< Calculator for values and derivatoves
-       int                             mNbParam; ///< Number of parameters
-       std::vector<double>             mVParam;  ///< Computed parameters
-       bool                            mIsFraserMode; ///<  Std Mode / SIA Mode
-};
+    private:
+        cRandInvertibleDist(const cRandInvertibleDist &) = delete;
 
+        double mRhoMax;
+        cPt3di mDeg;                            ///< Degree of dist
+        std::vector<cDescOneFuncDist> mVecDesc; ///< Vector of descriptor
+        tCalc *mEqVal;                          ///< Calculator for values only
+        tCalc *mEqDer;                          ///< Calculator for values and derivatoves
+        int mNbParam;                           ///< Number of parameters
+        std::vector<double> mVParam;            ///< Computed parameters
+        bool mIsFraserMode;                     ///<  Std Mode / SIA Mode
+    };
 
     // ==========================  utility to generate names  ===================
 
@@ -90,24 +88,24 @@ std::vector<cDescOneFuncDist>   DescDist(const cPt3di & aDeg,bool isFraserMode);
 
     std::vector<std::string> NamesIntr(const std::string &aPref); //  F  PPx   PPy
 
-     //  ====  photogrametric equations ==============================
-     
-           // .............   Equation implying only distorsions  .............
-     
-/**  Allocate a calculator computing the distorsion  , used when distorsion is fixed and x,y are parameters (we need
-     derivate to x,y for example in iterative inversion)
-       UK=x,y  Obs=K1,K2 .....   K1 r +K2 R^3 ...
- */
-NS_SymbolicDerivative::cCalculator<double> * EqDist(const cPt3di & aDeg,bool WithDerive,int aSzBuf,bool isFraserMode);
+    //  ====  photogrametric equations ==============================
 
-/** Allocate a calculator computing the base familly of a distorsion  UK=x,y Obs=K1,K2 .....  Kr, K2 R^3 , idem previous
-    but does not return the sum, but the series of each independant function, used for least-square  feating with a
-    given familly of func (for example in approximat inversion by least square)
- */
-NS_SymbolicDerivative::cCalculator<double> * EqBaseFuncDist(const cPt3di & aDeg,int aSzBuf,bool isFraserMode);
+    // .............   Equation implying only distorsions  .............
 
-/** Alloc a map corresponding to  distorsions :   create a map interface to an EqDist */
-cDataNxNMapCalcSymbDer<double,2> * NewMapOfDist(const cPt3di & aDeg,const std::vector<double> & aVObs,int aSzBuf,bool isFraserMode);
+    /**  Allocate a calculator computing the distorsion  , used when distorsion is fixed and x,y are parameters (we need
+         derivate to x,y for example in iterative inversion)
+           UK=x,y  Obs=K1,K2 .....   K1 r +K2 R^3 ...
+     */
+    NS_SymbolicDerivative::cCalculator<double> *EqDist(const cPt3di &aDeg, bool WithDerive, int aSzBuf, bool isFraserMode);
+
+    /** Allocate a calculator computing the base familly of a distorsion  UK=x,y Obs=K1,K2 .....  Kr, K2 R^3 , idem previous
+        but does not return the sum, but the series of each independant function, used for least-square  feating with a
+        given familly of func (for example in approximat inversion by least square)
+     */
+    NS_SymbolicDerivative::cCalculator<double> *EqBaseFuncDist(const cPt3di &aDeg, int aSzBuf, bool isFraserMode);
+
+    /** Alloc a map corresponding to  distorsions :   create a map interface to an EqDist */
+    cDataNxNMapCalcSymbDer<double, 2> *NewMapOfDist(const cPt3di &aDeg, const std::vector<double> &aVObs, int aSzBuf, bool isFraserMode);
 
     // .............   Equation implying only projection  .............
 
@@ -116,8 +114,8 @@ cDataNxNMapCalcSymbDer<double,2> * NewMapOfDist(const cPt3di & aDeg,const std::v
     ///  For computing projections "inverse"   R2->R3 , return in fact direction of  bundle
     NS_SymbolicDerivative::cCalculator<double> *EqCPProjInv(eProjPC aType, bool WithDerive, int aSzBuf);
 
-           // .............   Equation colinearity , imply external parameter, Projectiion, distorsion, foc+PP .............
-NS_SymbolicDerivative::cCalculator<double> * EqColinearityCamPPC(eProjPC  aType,const cPt3di & aDeg,bool WithDerive,int aSzBuf,bool ReUse,bool isFraserMode);
+    // .............   Equation colinearity , imply external parameter, Projectiion, distorsion, foc+PP .............
+    NS_SymbolicDerivative::cCalculator<double> *EqColinearityCamPPC(eProjPC aType, const cPt3di &aDeg, bool WithDerive, int aSzBuf, bool ReUse, bool isFraserMode);
 
     // .............   Equation radiometry .............
     NS_SymbolicDerivative::cCalculator<double> *EqRadiomVignettageLinear(int aNbDeg, bool WithDerive, int aSzBuf, bool WithCste, int aDegPolSens);
@@ -126,14 +124,9 @@ NS_SymbolicDerivative::cCalculator<double> * EqColinearityCamPPC(eProjPC  aType,
     NS_SymbolicDerivative::cCalculator<double> *EqRadiomEqualisation(int aDegSens, int aDegIm, bool WithDerive, int aSzBuf, bool WithCste, int aDegPolSens);
     NS_SymbolicDerivative::cCalculator<double> *EqRadiomStabilization(int aDegSens, int aDegIm, bool WithDerive, int aSzBuf, bool WithCste, int aDegPolSens);
 
-           // .............   Equation on rigid bloc .............
-NS_SymbolicDerivative::cCalculator<double> * EqBlocRig(bool WithDerive,int aSzBuf,bool Reuse);  // RIGIDBLOC
-NS_SymbolicDerivative::cCalculator<double> * EqBlocRig_RatE(bool WithDerive,int aSzBuf,bool Reuse);  // RIGIDBLOC
-
-
-
-
-
+    // .............   Equation on rigid bloc .............
+    NS_SymbolicDerivative::cCalculator<double> *EqBlocRig(bool WithDerive, int aSzBuf, bool Reuse);      // RIGIDBLOC
+    NS_SymbolicDerivative::cCalculator<double> *EqBlocRig_RatE(bool WithDerive, int aSzBuf, bool Reuse); // RIGIDBLOC
 
     //  ====   equations used in tuto/bench/ devpt of surface  ==============================
 

@@ -46,6 +46,8 @@ namespace MMVII
         void ConstructUniformRandomVectorAndApplyDelaunay();
         void GeneratePointsForDelaunay();
         void OneIterationFitModele();
+        cPt2dr ApplyBarycenterTranslationFormulaToFilledPixel(cHomot2D<tREAL8> & aCurrentTranslationPointA, cHomot2D<tREAL8> & aCurrentTranslationPointB, 
+                                                              cHomot2D<tREAL8> & aCurrentTranslationPointC, std::vector<double> & aVObs); // new addition
 
     private:
         // ==    Mandatory args ====
@@ -185,6 +187,24 @@ namespace MMVII
 		// BuildTrianglesAndApplyDelaunayTriangulation(); // Apply Delaunay triangulation on generated points.
 	}
 
+    cPt2dr cAppli_cTriangleDeformation::ApplyBarycenterTranslationFormulaToFilledPixel(cHomot2D<tREAL8> & aCurrentTranslationPointA, cHomot2D<tREAL8> & aCurrentTranslationPointB, 
+                                                                                       cHomot2D<tREAL8> & aCurrentTranslationPointC, std::vector<double> & aVObs) // new addition
+    {
+        // auto aXTri = aXCoordinates + aAlphaCoordinate * aGeomTrXPointA + aBetaCoordinate * aGeomTrXPointB + aGammaCoordinate * aGeomTrXPointC;
+        // auto aYTri = aYCoordinates + aAlphaCoordinate * aGeomTrYPointA + aBetaCoordinate * aGeomTrYPointB + aGammaCoordinate * aGeomTrYPointC;
+        size_t aIndObs = 0;
+
+        auto aXTri = aVObs[aIndObs] + aVObs[aIndObs + 2] * aCurrentTranslationPointA.Tr().x() + aVObs[aIndObs + 3] * aCurrentTranslationPointB.Tr().x() + 
+                     aVObs[aIndObs + 4] * aCurrentTranslationPointC.Tr().x();
+        auto aYTri = aVObs[aIndObs + 1] + aVObs[aIndObs + 2] * aCurrentTranslationPointA.Tr().y() + aVObs[aIndObs + 3] * aCurrentTranslationPointB.Tr().y() + 
+                     aVObs[aIndObs + 4] * aCurrentTranslationPointC.Tr().y();
+
+        cPt2dr aComputedTranslatedPixel = cPt2dr(aXTri, aYTri);
+
+        return aComputedTranslatedPixel;
+
+    }
+
     void cAppli_cTriangleDeformation::OneIterationFitModele()
     {
         //----------- index of unkown, basic here because the unknown are the same for each equation
@@ -194,7 +214,10 @@ namespace MMVII
 
         //----------- extract current parameters
         cDenseVect<double> aVCur = mSys->CurGlobSol();
-        // cHomot2D<tREAL8> aCurTr(cPt2dr(aVCur(3), aVCur(4)), aVCur(2));    // current affine translation
+        // new addition
+        cHomot2D<tREAL8> aCurTrPointA(cPt2dr(aVCur(0), aVCur(1)), 0);    // current affine translation point A
+        cHomot2D<tREAL8> aCurTrPointB(cPt2dr(aVCur(2), aVCur(3)), 0);    // current affine translation point B
+        cHomot2D<tREAL8> aCurTrPointC(cPt2dr(aVCur(4), aVCur(5)), 0);    // current affine translation point C
         // double aCurScR = aVCur(0);                                         // current scale on radiometry
         // double aCurTrR = aVCur(1);                                         // current translation on radiometry
 
@@ -218,28 +241,25 @@ namespace MMVII
 
             for (long unsigned int aFilledPixel=0; aFilledPixel < aVectorToFillWithInsidePixels.size(); aFilledPixel++)
             {
-                if (mDImPre.InsideBL(aCompTri.Pt(aFilledPixel)))             // avoid error
+                const cPt2dr aFilledPoint(aVectorToFillWithInsidePixels[aFilledPixel].x(), aVectorToFillWithInsidePixels[aFilledPixel].y());
+                if (mDImPre.InsideBL(aFilledPoint))         // avoid error
                 {
                     FormalInterpBarycenter_SetObs(aVObs, 0, aCompTri, aVectorToFillWithInsidePixels, aFilledPixel, mDImPre);
+
+                    cPt2dr aComputedTranslationPixelFromFormula = ApplyBarycenterTranslationFormulaToFilledPixel(aCurTrPointA, aCurTrPointB, aCurTrPointC, aVObs);
+
+                    FormalBilinTri_SetObs(aVObs, TriangleDisplacement_NbObs, aComputedTranslationPixelFromFormula, mDImPre);
 
                     // Now add observation
                     mSys->CalcAndAddObs(mEqHomTri, aVecInd, aVObs);
 /*
-                    double aDif = mDImPre.GetVBL(aTri.Pt(aKnot)) - (mValueMod[aKPt]); // residual
+                    double aDif = mDImPre.GetVBL(aComputedTranslationPixelFromFormula) - (mValueMod[aKPt]); // residual
                     aSomMod += mValueMod[aKPt];
                     aSomDif += std::abs(aDif);
                     */
                 }
                 else
                     aNbOut++;
-                // Set_TriangleDeform_Obs(aVObs, 0, aPIm, mDImPre, mDImPost);
-
-                //  observation point model and value model
-                /*
-                aVObs[6] = aPMod.x();
-                aVObs[7] = aPMod.y();
-                aVObs[8] = mValueMod[aKPt];
-                */
 
                 // compute indicator
                 // double aDif = mDImIn.GetVBL(aPIm) - (aCurTrR + mValueMod[aKPt]); // residual

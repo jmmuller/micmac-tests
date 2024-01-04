@@ -54,10 +54,10 @@ namespace MMVII
         TypeFunc aY0(aVObs.at(aKObs0 + 1));
         TypeFunc aCst1 = CreateCste(1.0, aX0); // create a symbolic formula for constant 1
 
-        TypeFunc aWX1 = FX - aX0;     // weigth for I10 and I11
-        TypeFunc aWX0 = aCst1 - aWX1; // weigth for I00 and I01
-        TypeFunc aWY1 = FY - aY0;     // weigth for I10 and I11
-        TypeFunc aWY0 = aCst1 - aWY1; // weigth for I00 and I10
+        TypeFunc aWX1 = FX - aX0;     // weight for I10 and I11
+        TypeFunc aWX0 = aCst1 - aWX1; // weight for I00 and I01
+        TypeFunc aWY1 = FY - aY0;     // weight for I10 and I11
+        TypeFunc aWY0 = aCst1 - aWY1; // weight for I00 and I10
 
         return aWX0 * aWY0 * aVObs.at(aKObs0 + 2)    // I00
                + aWX1 * aWY0 * aVObs.at(aKObs0 + 3)  // I10
@@ -79,13 +79,13 @@ namespace MMVII
     )
     {
         const cPt2dr aFilledPoint(aVectorFilledwithInsidePixels[aFilledPixel].x(), aVectorFilledwithInsidePixels[aFilledPixel].y());
-        const cPt3dr barycenter_coordinates = aCompTri.CoordBarry(aFilledPoint);
+        const cPt3dr aBarycenterCoordinates = aCompTri.CoordBarry(aFilledPoint);
         // push integer coordinate of point
         SetOrPush(aVObs, aK0, Type(aFilledPoint.x()));
         SetOrPush(aVObs, aK0 + 1, Type(aFilledPoint.y()));
-        SetOrPush(aVObs, aK0 + 2, Type(barycenter_coordinates.x()));
-        SetOrPush(aVObs, aK0 + 3, Type(barycenter_coordinates.y()));
-        SetOrPush(aVObs, aK0 + 4, Type(barycenter_coordinates.z()));
+        SetOrPush(aVObs, aK0 + 2, Type(aBarycenterCoordinates.x()));
+        SetOrPush(aVObs, aK0 + 3, Type(aBarycenterCoordinates.y()));
+        SetOrPush(aVObs, aK0 + 4, Type(aBarycenterCoordinates.z()));
         SetOrPush(aVObs, aK0 + 5, (Type)aDIm.GetV(cPt2di(aVectorFilledwithInsidePixels[aFilledPixel].x(), 
                                                          aVectorFilledwithInsidePixels[aFilledPixel].y())));
     }
