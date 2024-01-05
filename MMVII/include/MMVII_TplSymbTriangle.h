@@ -7,10 +7,11 @@
 #include "MMVII_Ptxd.h"
 #include "MMVII_Geom2D.h"
 
-/** \file MMVII_TplSymbTriangle.h
-    \brief Contains helpers for triangle as formula
+/**
+ \file MMVII_TplSymbTriangle.h
+ \brief Contains helpers for triangle as formula
 
-*/
+**/
 
 using namespace NS_SymbolicDerivative;
 
@@ -40,9 +41,8 @@ namespace MMVII
 
      In this function the value  X0, Y0,  I00, I10, I01, I11  are communicated as element
      of the observation vector aVObs, starting from aKObs0.
+    **/
 
-
- */
     template <class TypeFunc, class TypeObs>
     TypeFunc FormalBilinTri_Formula(
         const std::vector<TypeObs> &aVObs,
@@ -65,7 +65,7 @@ namespace MMVII
                + aWX1 * aWY1 * aVObs.at(aKObs0 + 5); // I11
     }
 
-    /**  standard name for observation */
+    //  standard name for observation
     std::vector<std::string> FormalBilinIm2D_NameObs(const std::string &aPrefix);
 
     template <class Type, class TypeIm>
@@ -90,9 +90,10 @@ namespace MMVII
                                                          aVectorFilledwithInsidePixels[aFilledPixel].y())));
     }
 
-    /**  This is the "companion" function of  FormalBilinIm2D_Formula, it fills
-         the vector aVObs with X0,Y0,I00,   that will be used in FormalBilinIm2D_Formula.
-     */
+    /* 
+    This is the "companion" function of  FormalBilinIm2D_Formula, it fills
+    the vector aVObs with X0,Y0,I00, that will be used in FormalBilinIm2D_Formula.
+    */
 
     template <class Type, class TypeIm>
     void FormalBilinTri_SetObs(

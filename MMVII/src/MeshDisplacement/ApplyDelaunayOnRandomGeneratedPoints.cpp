@@ -35,8 +35,6 @@ namespace MMVII
 		void ApplyAndSaveDelaunayTriangulationOnPoints();
 		void GeneratePointsForDelaunay();
 		void ConstructUniformRandomVector();
-		// void GetCoordinatesInsideTriangles(const cTriangulation2D<tREAL8> & aDelaunayTriangle);
-		void ComputeMinimumDistanceToCircle(const cTriangle<tREAL8, 2> & aTri);
 		void ComputeShiftedTrianglesAndPoints(const cTriangle<tREAL8, 2> & aTri, std::vector<cPt2dr> & ShiftedTriangleCoordinates,
 											  const double aUniformRandomRedChannel, const double aUniformRandomGreenChannel,
 											  const double aUniformRandomBlueChannel);
@@ -89,22 +87,6 @@ namespace MMVII
 
 	//=========================================================
 
-	/*
-	void cAppli_RandomGeneratedDelaunay::GetCoordinatesInsideTriangles(const cTriangulation2D<tREAL8> & aDelaunayTriangle)
-	{
-		std::vector<cPt2dr> vector_of_barycenters;
-		for (size_t aFace = 0; aFace < aDelaunayTriangle.NbFace(); aFace++)
-		{
-			cTriangle<tREAL8, 2> aTriangulatedTri = aDelaunayTriangle.KthTri(aFace);
-			cTriangle2DCompiled<tREAL8> aCompiledTri(aTriangulatedTri);
-			std::vector<cPt2di> aVectorToFillwithInsidePixels;
-			aCompiledTri.PixelsInside(aVectorToFillwithInsidePixels);
-			vector_of_barycenters.push_back(aTriangulatedTri.Barry());
-		}
-		StdOut() << vector_of_barycenters << std::endl;
-	}
-	*/
-
 	void cAppli_RandomGeneratedDelaunay::ComputeShiftedTrianglesAndPoints(const cTriangle<tREAL8, 2> & aTri,
 																		  std::vector<cPt2dr> & ShiftedTriangleCoordinates,
 																		  const double aUniformRandomRedChannel, 
@@ -125,11 +107,11 @@ namespace MMVII
 		// Get pixels inside each triangle and shift them
 		std::vector<cPt2di> aVectorToFillwithInsidePixels;
 		aCompTri.PixelsInside(aVectorToFillwithInsidePixels);
-		for (long unsigned int filledPixel=0; filledPixel < aVectorToFillwithInsidePixels.size(); filledPixel++)
+		for (long unsigned int FilledPixel=0; FilledPixel < aVectorToFillwithInsidePixels.size(); FilledPixel++)
 		{
-			if (filledPixel % 10 == 0)
+			if (FilledPixel % 10 == 0)
 			{
-				const cPt2dr aFilledPoint(aVectorToFillwithInsidePixels[filledPixel].x(), aVectorToFillwithInsidePixels[filledPixel].y());
+				const cPt2dr aFilledPoint(aVectorToFillwithInsidePixels[FilledPixel].x(), aVectorToFillwithInsidePixels[FilledPixel].y());
 				const cPt3dr barycenter_coordinates = aCompTri.CoordBarry(aFilledPoint);
 				const cPt2dr ShiftedInsidePixels = cPt2dr(aFilledPoint.x() + barycenter_coordinates.x() * PercentDiffA.x() +
 													barycenter_coordinates.y() * PercentDiffB.x() + barycenter_coordinates.z() * PercentDiffC.x(), 
@@ -144,20 +126,6 @@ namespace MMVII
 		}
 	}
 
-	void cAppli_RandomGeneratedDelaunay::ComputeMinimumDistanceToCircle(const cTriangle<tREAL8, 2> & aTri)
-	{
-			// Compute center circle circum
-			const cPt2dr aC = aTri.CenterInscribedCircle();
-			// Compute min dist to this circle
-			double aMinDist = 1e20;
-			for (const auto &aPt : mVectorPts)
-				aMinDist = std::min(aMinDist, Norm2(aC - aPt));
-			// This  min dist must be (almost) equal to circum-radius
-			const double aRadiusCircum = Norm2(aC - aTri.Pt(0));
-			const double aDif = std::abs(aRadiusCircum - aMinDist);
-			MMVII_INTERNAL_ASSERT_bench(aDif < 1e-5, "Inscribed circle property in delaunay");
-	}
-
 	void cAppli_RandomGeneratedDelaunay::ApplyAndSaveDelaunayTriangulationOnPoints()
 	{
 		cTriangulation2D<tREAL8> aDelTri(mVectorPts);
@@ -170,7 +138,6 @@ namespace MMVII
 		for (size_t aKt = 0; aKt < aDelTri.NbFace(); aKt++)
 		{
 			const cTriangle<tREAL8, 2> aTri = aDelTri.KthTri(aKt);
-			ComputeMinimumDistanceToCircle(aTri);
 
 			if (mShiftTriangles)
 			{
@@ -186,7 +153,6 @@ namespace MMVII
 		cTriangulation2D<tREAL8> aModifiedDelTri(ShiftedTriangleCoordinates);
 
 		aModifiedDelTri.MakeDelaunay();
-		// GetCoordinatesInsideTriangles(aDelTri); // Other development
 
 		// Save files to .ply format
 		aDelTri.WriteFile(mNamePlyFile, mPlyFileisBinary);
@@ -207,8 +173,6 @@ namespace MMVII
 
 	void cAppli_RandomGeneratedDelaunay::GeneratePointsForDelaunay()
 	{
-		// std::vector<cPt2dr> aVPts;
-
 		const int aMinimumLinCol = std::min(mSz.y(), mSz.x());
 
 		// make sure that values greater than image size can't be drawn from uniform law.
