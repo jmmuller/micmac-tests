@@ -1,5 +1,5 @@
 #include "cMMVII_Appli.h"
-// #include "MMVII_enums.h"
+
 #include "MMVII_Image2D.h"
 #include "MMVII_Geom2D.h"
 
@@ -38,10 +38,6 @@ namespace MMVII
         cCollecSpecArg2007 &ArgObl(cCollecSpecArg2007 &anArgObl) override;
         cCollecSpecArg2007 &ArgOpt(cCollecSpecArg2007 &anArgOpt) override;
 
-    
-        // void ComputeMinimumDistanceToCircle(const cTriangle<tREAL8, 2> & aTri);
-        // void BuildTrianglesAndApplyDelaunayTriangulation();
-        // void ConstructUniformRandomVector();
         void ConstructUniformRandomVectorAndApplyDelaunay();
         void GeneratePointsForDelaunay();
         void OneIterationFitModele();
@@ -125,35 +121,7 @@ namespace MMVII
         return anArgOpt
                << AOpt2007(mShow, "Show", "Whether to print result", {eTA2007::HDV});
     }
-    /*
-	void cAppli_cTriangleDeformation::ComputeMinimumDistanceToCircle(const cTriangle<tREAL8, 2> & aTri)
-	{
-			// Compute center circle circum
-			const cPt2dr aC = aTri.CenterInscribedCircle();
-			// Compute min dist to this circle
-			double aMinDist = 1e20;
-			for (const auto &aPt : mVectorPts)
-				aMinDist = std::min(aMinDist, Norm2(aC - aPt));
-			// This  min dist must be (almost) equal to circum-radius
-			const double aRadiusCircum = Norm2(aC - aTri.Pt(0));
-			const double aDif = std::abs(aRadiusCircum - aMinDist);
-			MMVII_INTERNAL_ASSERT_bench(aDif < 1e-5, "Inscribed circle property in Delaunay");
-	}
 
-	void cAppli_cTriangleDeformation::BuildTrianglesAndApplyDelaunayTriangulation()
-	{
-		mDelTri = mVectorPts;
-
-		mDelTri.MakeDelaunay();
-        
-		// Loop over all triangle
-		for (size_t aKt = 0; aKt < mDelTri.NbFace(); aKt++)
-		{
-			const cTriangle<tREAL8, 2> aTri = mDelTri.KthTri(aKt);
-			ComputeMinimumDistanceToCircle(aTri);
-		}
-	}
-    */
 	void cAppli_cTriangleDeformation::ConstructUniformRandomVectorAndApplyDelaunay()
 	{
         mVectorPts.pop_back();
