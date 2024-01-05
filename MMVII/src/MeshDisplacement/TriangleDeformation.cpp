@@ -250,7 +250,7 @@ namespace MMVII
 
         // Update all parameter taking into account previous observation
         mSys->SolveUpdateReset();
-        /*
+
         if (mShow)
             StdOut() << aSomDif / aTotalNumberOfInsidePixels << ", " << aNbOut << std::endl;
     }
