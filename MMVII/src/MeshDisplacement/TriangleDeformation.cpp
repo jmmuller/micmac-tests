@@ -14,7 +14,6 @@ using namespace NS_SymbolicDerivative;
 
    \brief file for generating random points distributed uniformely
    and applying 2D Delaunay triangulation.
-
 **/
 
 namespace MMVII
@@ -193,7 +192,7 @@ namespace MMVII
         // auto aXTri = aXCoordinates + aAlphaCoordinate * aGeomTrXPointA + aBetaCoordinate * aGeomTrXPointB + aGammaCoordinate * aGeomTrXPointC;
         // auto aYTri = aYCoordinates + aAlphaCoordinate * aGeomTrYPointA + aBetaCoordinate * aGeomTrYPointB + aGammaCoordinate * aGeomTrYPointC;
         size_t aIndObs = 0;
-
+        // apply barycenter translation formula for x and y.
         auto aXTri = aVObs[aIndObs] + aVObs[aIndObs + 2] * aCurrentTranslationPointA.Tr().x() + aVObs[aIndObs + 3] * aCurrentTranslationPointB.Tr().x() + 
                      aVObs[aIndObs + 4] * aCurrentTranslationPointC.Tr().x();
         auto aYTri = aVObs[aIndObs + 1] + aVObs[aIndObs + 2] * aCurrentTranslationPointA.Tr().y() + aVObs[aIndObs + 3] * aCurrentTranslationPointB.Tr().y() + 
@@ -218,65 +217,57 @@ namespace MMVII
         cHomot2D<tREAL8> aCurTrPointA(cPt2dr(aVCur(0), aVCur(1)), 0);    // current affine translation point A
         cHomot2D<tREAL8> aCurTrPointB(cPt2dr(aVCur(2), aVCur(3)), 0);    // current affine translation point B
         cHomot2D<tREAL8> aCurTrPointC(cPt2dr(aVCur(4), aVCur(5)), 0);    // current affine translation point C
-        // double aCurScR = aVCur(0);                                         // current scale on radiometry
-        // double aCurTrR = aVCur(1);                                         // current translation on radiometry
+        // double aCurScR = aVCur(0);                                    // current scale on radiometry
+        // double aCurTrR = aVCur(1);                                    // current translation on radiometry
 
         //----------- declaration of indicator of convergence
-        // double aSomDif = 0; // sum of difference between model and image
-        // double aSomMod = 0; // sum of value of model, to normalize the difference
+        double aSomDif = 0; // sum of difference between untranslated pixel and translated one.
+        double aSomMod = 0; // sum of value of model, to normalize the difference
         double aNbOut = 0;  // number of points out of image
 
         // Parse all the point to add the observations on each point
         for (size_t aTr = 0; aTr < mDelTri.NbFace(); aTr++)
         {
             const cTriangle<tREAL8, 2> aTri = mDelTri.KthTri(aTr);
-            // cPt2dr aPMod = mVPtsMod[aKPt];         // point of model
-            // cPt2dr aPIm = aCurHomM2I.Value(aPMod); // image of aPMod by current homotethy
-            // put observations in vectors
-            //  observations on image and point-image
-            // Set_FormalBilinIm2D_Obs(aVObs, 0, aPIm, mDIm);
+
             const cTriangle2DCompiled aCompTri(aTri);
             std::vector<cPt2di> aVectorToFillWithInsidePixels;
 		    aCompTri.PixelsInside(aVectorToFillWithInsidePixels);
 
-            for (long unsigned int aFilledPixel=0; aFilledPixel < aVectorToFillWithInsidePixels.size(); aFilledPixel++)
+            // long unsigned is necessary as there can be a lot of pixels in triangles.
+            for (long unsigned int aFilledPixel=0; aFilledPixel < aVectorToFillWithInsidePixels.size(); aFilledPixel++) 
             {
-                const cPt2dr aFilledPoint(aVectorToFillWithInsidePixels[aFilledPixel].x(), aVectorToFillWithInsidePixels[aFilledPixel].y());
-                if (mDImPre.InsideBL(aFilledPoint))         // avoid error
+                // prepare for barycenter translation formula by filling aVObs with different coordinates.
+                FormalInterpBarycenter_SetObs(aVObs, 0, aCompTri, aVectorToFillWithInsidePixels, aFilledPixel, mDImPre);
+
+                cPt2dr aTranslatedFilledPoint = ApplyBarycenterTranslationFormulaToFilledPixel(aCurTrPointA, aCurTrPointB, aCurTrPointC, aVObs); // image of a point in triangle by current homothety
+                if (mDImPre.InsideBL(aTranslatedFilledPoint))         // avoid error
                 {
-                    FormalInterpBarycenter_SetObs(aVObs, 0, aCompTri, aVectorToFillWithInsidePixels, aFilledPixel, mDImPre);
-
-                    cPt2dr aComputedTranslationPixelFromFormula = ApplyBarycenterTranslationFormulaToFilledPixel(aCurTrPointA, aCurTrPointB, aCurTrPointC, aVObs);
-
-                    FormalBilinTri_SetObs(aVObs, TriangleDisplacement_NbObs, aComputedTranslationPixelFromFormula, mDImPre);
+                    FormalBilinTri_SetObs(aVObs, TriangleDisplacement_NbObs, aTranslatedFilledPoint, mDImPre); // prepare for bilinear formula
 
                     // Now add observation
                     mSys->CalcAndAddObs(mEqHomTri, aVecInd, aVObs);
-/*
-                    double aDif = mDImPre.GetVBL(aComputedTranslationPixelFromFormula) - (mValueMod[aKPt]); // residual
-                    aSomMod += mValueMod[aKPt];
+
+                    // compute indicators
+                    double aDif = mDImPre.GetVBL(cPt2dr(aVObs[0], aVObs[1])) - mDImPost.GetVBL(aTranslatedFilledPoint); // residual
+                    aSomMod += mDImPost.GetV(cPt2di(aVObs[0], aVObs[1]));
                     aSomDif += std::abs(aDif);
-                    */
                 }
                 else
                     aNbOut++;
-
-                // compute indicator
-                // double aDif = mDImIn.GetVBL(aPIm) - (aCurTrR + mValueMod[aKPt]); // residual
             }
-            
         }
 
         // Update all parameter taking into account previous observation
         mSys->SolveUpdateReset();
-        /*
+
         if (mShow)
             StdOut() << " Dif= " << aSomDif / aSomMod << " NbOut=" << aNbOut << std::endl;
-            */
     }
 
     int cAppli_cTriangleDeformation::Exe()
     {
+        // read pre and post images and their sizes
         mImPre = tIm::FromFile(mNamePreImage);
         mImPost = tIm::FromFile(mNamePostImage);
     

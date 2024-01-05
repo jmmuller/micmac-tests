@@ -47,6 +47,7 @@ namespace MMVII
       // size_t IndX = IndTri + TriangleDisplacement_NbObs;
 
       // extract observation on model
+
       /*
       const auto &aXCoordinates = aVObs[IndTri];
       const auto &aYCoordinates = aVObs[IndTri + 1];
@@ -54,6 +55,7 @@ namespace MMVII
       const auto &aBetaCoordinate = aVObs[IndTri + 3];
       const auto &aGammaCoordinate = aVObs[IndTri + 4]; // change here
       */
+
       const auto &aIntensityImPre = aVObs[IndTri + 5];
       const auto &aComputedXCoordinate = aVObs[IndTri + 6];
       const auto &aComputedYCoordinate = aVObs[IndTri + 7];  // Only these variables are needed for application of bilinear formula.
@@ -75,11 +77,7 @@ namespace MMVII
       // auto aYTri = aYCoordinates + aAlphaCoordinate * aGeomTrYPointA + aBetaCoordinate * aGeomTrYPointB + aGammaCoordinate * aGeomTrYPointC; // change
 
       // compute formula of bilinear interpolation
-
       auto aEstimatedValueTri = FormalBilinTri_Formula(aVObs, TriangleDisplacement_NbObs, aComputedXCoordinate, aComputedYCoordinate);
-      // take into account radiometric transform
-      // auto aValueModele = aRadTr + aRadSc * vModelInit;
-      // auto aValueModele = vModelInit;
 
       // residual is simply the difference between both values
       return {aEstimatedValueTri - aIntensityImPre};
