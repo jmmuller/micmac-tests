@@ -101,7 +101,6 @@ namespace MMVII
             cPt2dr aPixSE = ToR(aPix) / aDeZoom;
             aRes.DIm().SetV(aPix, aResSsEch.DIm().DefGetVBL(aPixSE, 0));
         }
-
         return aRes;
     }
 
@@ -119,7 +118,6 @@ namespace MMVII
 
         for (const auto &aPix : *mDImIn)
             mDImOut->SetV(aPix, 255 - mDImIn->GetV(aPix));
-
 
         tImDispl aImDispx = GenerateSmoothRandDispl();
         tImDispl aImDispy = GenerateSmoothRandDispl();

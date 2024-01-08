@@ -51,12 +51,11 @@ namespace MMVII
 
         // ==    Optionnal args ====
         bool mShow; // print result, export image ...
+        bool mGenerateDisplacementImage;
         int mNumberPointsToGenerate;	 // number of generated points
 		int mRandomUniformLawUpperBound; // Uniform law generate numbers from [0, mRandomUniformLawUpperBound [
 
         // ==    Internal variables ====
-        // std::vector<cPt2dr> mVPtsMod;  ///<  points sampling the model.
-        // std::vector<double> mValueMod; ///<  values of points in mVPtsMod.
 
         cPt2di mSzImPre; ///<  size of image.
         tIm mImPre;      ///<  memory representation of the image.
@@ -65,6 +64,10 @@ namespace MMVII
         cPt2di mSzImPost; ///<  size of image.
         tIm mImPost;      ///<  memory representation of the image.
         tDIm &mDImPost;   ///<  memory representation of the image.
+
+        cPt2di mSzImOut; ///<  size of image.
+        tIm mImOut;      ///<  memory representation of the image.
+        tDIm &mDImOut;   ///<  memory representation of the image.
 
         std::vector<cPt2dr> mVectorPts; // A vector containing a set of points
         cTriangulation2D<tREAL8> mDelTri; // A Delaunay triangle
@@ -76,12 +79,16 @@ namespace MMVII
     cAppli_cTriangleDeformation::cAppli_cTriangleDeformation(const std::vector<std::string> &aVArgs,
                                                              const cSpecMMVII_Appli &aSpec) : cMMVII_Appli(aVArgs, aSpec),
                                                                                               mShow(true),
+                                                                                              mGenerateDisplacementImage(false),
                                                                                               mSzImPre(cPt2di(1, 1)),
                                                                                               mImPre(mSzImPre),
                                                                                               mDImPre(mImPre.DIm()),
                                                                                               mSzImPost(cPt2di(1, 1)),
                                                                                               mImPost(mSzImPost),
                                                                                               mDImPost(mImPost.DIm()),
+                                                                                              mSzImOut(cPt2di(1, 1)),
+                                                                                              mImOut(mSzImOut),
+                                                                                              mDImOut(mImOut.DIm()),
                                                                                               mVectorPts({cPt2dr(0, 0)}),
                                                                                               mDelTri(mVectorPts),
                                                                                               mSys(nullptr),
@@ -119,12 +126,13 @@ namespace MMVII
     {
 
         return anArgOpt
-               << AOpt2007(mShow, "Show", "Whether to print result", {eTA2007::HDV});
+               << AOpt2007(mShow, "Show", "Whether to print minimisation results.", {eTA2007::HDV})
+               << AOpt2007(mGenerateDisplacementImage, "GenerateDisplacementImage", "Whether to generate and save an image having been translated.", {eTA2007::HDV});
     }
 
 	void cAppli_cTriangleDeformation::ConstructUniformRandomVectorAndApplyDelaunay()
 	{
-        mVectorPts.pop_back();
+        mVectorPts.pop_back(); // eliminate initialisation values
 		// Generate coordinates from drawing lines and columns of coordinates from a uniform distribution
 		for (int aNbPt = 0; aNbPt < mNumberPointsToGenerate; aNbPt++)
 		{
@@ -148,10 +156,8 @@ namespace MMVII
 			StdOut() << "Maximum value drawn from uniform law needs to be smaller than " << aMinimumLinCol << "." << std::endl;
 			std::cin >> mRandomUniformLawUpperBound;
 		}
-		// ConstructUniformRandomVector();
-        ConstructUniformRandomVectorAndApplyDelaunay();
 
-		// BuildTrianglesAndApplyDelaunayTriangulation(); // Apply Delaunay triangulation on generated points.
+        ConstructUniformRandomVectorAndApplyDelaunay();
 	}
 
     cPt2dr cAppli_cTriangleDeformation::ApplyBarycenterTranslationFormulaToFilledPixel(cHomot2D<tREAL8> & aCurrentTranslationPointA, cHomot2D<tREAL8> & aCurrentTranslationPointB, 
@@ -182,9 +188,9 @@ namespace MMVII
         //----------- extract current parameters
         cDenseVect<double> aVCur = mSys->CurGlobSol();
         // new addition
-        cHomot2D<tREAL8> aCurTrPointA(cPt2dr(aVCur(0), aVCur(1)), 0);    // current affine translation point A
-        cHomot2D<tREAL8> aCurTrPointB(cPt2dr(aVCur(2), aVCur(3)), 0);    // current affine translation point B
-        cHomot2D<tREAL8> aCurTrPointC(cPt2dr(aVCur(4), aVCur(5)), 0);    // current affine translation point C
+        cHomot2D<tREAL8> aCurTrPointA(cPt2dr(aVCur(0), aVCur(1)), 0);    // current homothety translation point A
+        cHomot2D<tREAL8> aCurTrPointB(cPt2dr(aVCur(2), aVCur(3)), 0);    // current homothety translation point B
+        cHomot2D<tREAL8> aCurTrPointC(cPt2dr(aVCur(4), aVCur(5)), 0);    // current homothety translation point C
         // double aCurScR = aVCur(0);                                    // current scale on radiometry
         // double aCurTrR = aVCur(1);                                    // current translation on radiometry
 
@@ -209,9 +215,9 @@ namespace MMVII
                 FormalInterpBarycenter_SetObs(aVObs, 0, aCompTri, aVectorToFillWithInsidePixels, aFilledPixel, mDImPre);
 
                 cPt2dr aTranslatedFilledPoint = ApplyBarycenterTranslationFormulaToFilledPixel(aCurTrPointA, aCurTrPointB, aCurTrPointC, aVObs); // image of a point in triangle by current homothety
-                if (mDImPre.InsideBL(aTranslatedFilledPoint))         // avoid error
+                if (mDImPost.InsideBL(aTranslatedFilledPoint))         // avoid error
                 {
-                    FormalBilinTri_SetObs(aVObs, TriangleDisplacement_NbObs, aTranslatedFilledPoint, mDImPre); // prepare for bilinear formula
+                    FormalBilinTri_SetObs(aVObs, TriangleDisplacement_NbObs, aTranslatedFilledPoint, mDImPost); // prepare for bilinear formula
 
                     // Now add observation
                     mSys->CalcAndAddObs(mEqHomTri, aVecInd, aVObs);
@@ -230,7 +236,7 @@ namespace MMVII
         mSys->SolveUpdateReset();
 
         if (mShow)
-            StdOut() << " Dif= " << aSomDif / aSomMod << " NbOut=" << aNbOut << std::endl;
+            StdOut() << " Dif= " << aSomDif / aSomMod << " NbOut= " << aNbOut << std::endl;
     }
 
     int cAppli_cTriangleDeformation::Exe()
@@ -238,18 +244,40 @@ namespace MMVII
         // read pre and post images and their sizes
         mImPre = tIm::FromFile(mNamePreImage);
         mImPost = tIm::FromFile(mNamePostImage);
-    
+
+        // cDataFileIm2D aDescFile = cDataFileIm2D::Create(mNamePreImage, false);
+
         mDImPre = mImPre.DIm();
         mSzImPre = mDImPre.Sz();
 
         mDImPost = mImPost.DIm();
         mSzImPost = mDImPost.Sz();
 
+        /*
+        mDImOut = mImOut.DIm();
+        mSzImOut = mDImPost.Sz();
+        */
+
+        mImOut = tIm(mSzImPost);
+        mDImOut = mImOut.DIm();
+
+        for (const auto &aNullPix : mDImPost)
+            mDImOut.SetV(aNullPix, 0);
+
+        // mDImOut.ToFile("Null.tif");
+
         GeneratePointsForDelaunay();
 
         const int aNbIters = 8;
         for (int aIter = 0; aIter < aNbIters; aIter++)
             OneIterationFitModele();
+
+        /*
+        for (const auto &aDisplacedPix : mDImPre)
+        {
+            
+        }
+        */
 
         return EXIT_SUCCESS;
     }
