@@ -257,13 +257,14 @@ namespace MMVII
         mDImOut = mImOut.DIm();
         mSzImOut = mDImPost.Sz();
         */
-
-        mImOut = tIm(mSzImPost);
-        mDImOut = mImOut.DIm();
+        if (mGenerateDisplacementImage)
+        {
+            mImOut = tIm(mSzImPost);
+            mDImOut = mImOut.DIm();
 
         for (const auto &aNullPix : mDImPost)
             mDImOut.SetV(aNullPix, 0);
-
+        }
         // mDImOut.ToFile("Null.tif");
 
         GeneratePointsForDelaunay();
