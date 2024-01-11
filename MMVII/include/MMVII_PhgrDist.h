@@ -147,9 +147,14 @@ namespace MMVII
 
     // .............   Equation implying topo subframe .............
 
-    /// Calc for parametrizes dist, Uk={a,b,c,x1,y1,z1,x2,y2,z2} Obs={r00, r01, r02, r10, r11, r12, r20, r21, r22, dx,dy,dz},
-    /// let pk=(xk,yk,zk), R=(r00..r22)  Residual :  R(p2-p2) - {dx,dy,dz}
-    NS_SymbolicDerivative::cCalculator<double> *EqTopoSubFrame(bool WithDerive, int aSzBuf);
+/// Calc for parametrizes dist, Uk={a,b,c,x1,y1,z1,x2,y2,z2} Obs={r00, r01, r02, r10, r11, r12, r20, r21, r22, dx,dy,dz},
+/// let pk=(xk,yk,zk), R=(r00..r22)  Residual :  R(p2-p2) - {dx,dy,dz}
+NS_SymbolicDerivative::cCalculator<double> * EqTopoSubFrame(bool WithDerive,int aSzBuf);
+
+/// Sum of square of unknown, to test non linear constraints
+NS_SymbolicDerivative::cCalculator<double> * EqSumSquare(int aNb,bool WithDerive,int aSzBuf,bool ReUse);
+
+
 
     // .............   Equation implying 2D distance conservation .............
 
