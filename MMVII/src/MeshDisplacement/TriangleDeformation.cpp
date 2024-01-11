@@ -52,11 +52,11 @@ namespace MMVII
 		int mRandomUniformLawUpperBound; // Uniform law generate numbers from [0, mRandomUniformLawUpperBound [
         int mNumberOfOptimisationIterations; // number of iterations in optimisation process
 
-        // ==    Optionnal args ====
+        // ==  Optionnal args ====
         bool mShow; // print result, export image ...
         bool mGenerateDisplacementImage;
 
-        // ==    Internal variables ====
+        // ==  Internal variables ====
 
         cPt2di mSzImPre; ///<  size of image.
         tIm mImPre;      ///<  memory representation of the image.
@@ -106,7 +106,7 @@ namespace MMVII
         aVInit(5) = 0;
 
         mSys = new cResolSysNonLinear<tREAL8>(eModeSSR::eSSR_LsqDense, aVInit);
-        mEqHomTri = EqDeformTriAffinity(true, 1); // true-> with derivative,  1=sz of buffer
+        mEqHomTri = EqDeformTriAffinity(true, 1); // true means with derivative,  1 is size of buffer
     }
 
     cAppli_cTriangleDeformation::~cAppli_cTriangleDeformation()
@@ -134,8 +134,8 @@ namespace MMVII
 
 	void cAppli_cTriangleDeformation::ConstructUniformRandomVectorAndApplyDelaunay()
 	{
-        mVectorPts.pop_back(); // eliminate initialisation values
-		// Generate coordinates from drawing lines and columns of coordinates from a uniform distribution
+        mVectorPts.pop_back(); // eliminate initialisation values.
+		// Generate coordinates from drawing lines and columns of coordinates from a uniform distribution.
 		for (int aNbPt = 0; aNbPt < mNumberPointsToGenerate; aNbPt++)
 		{
 			const double aUniformRandomLine = RandUnif_N(mRandomUniformLawUpperBound);
@@ -145,7 +145,7 @@ namespace MMVII
 		}
         mDelTri = mVectorPts;
 
-		mDelTri.MakeDelaunay();
+		mDelTri.MakeDelaunay(); // Delaunay triangulate randomly generated points.
 	}
 
 	void cAppli_cTriangleDeformation::GeneratePointsForDelaunay()
@@ -167,12 +167,12 @@ namespace MMVII
     {
         // auto aXTri = aXCoordinates + aAlphaCoordinate * aGeomTrXPointA + aBetaCoordinate * aGeomTrXPointB + aGammaCoordinate * aGeomTrXPointC;
         // auto aYTri = aYCoordinates + aAlphaCoordinate * aGeomTrYPointA + aBetaCoordinate * aGeomTrYPointB + aGammaCoordinate * aGeomTrYPointC;
-        size_t aIndObs = 0;
+        // size_t aIndObs = 0;
         // apply barycenter translation formula for x and y.
-        auto aXTri = aVObs[aIndObs] + aVObs[aIndObs + 2] * aCurrentTranslationPointA.Tr().x() + aVObs[aIndObs + 3] * aCurrentTranslationPointB.Tr().x() + 
-                     aVObs[aIndObs + 4] * aCurrentTranslationPointC.Tr().x();
-        auto aYTri = aVObs[aIndObs + 1] + aVObs[aIndObs + 2] * aCurrentTranslationPointA.Tr().y() + aVObs[aIndObs + 3] * aCurrentTranslationPointB.Tr().y() + 
-                     aVObs[aIndObs + 4] * aCurrentTranslationPointC.Tr().y();
+        auto aXTri = aVObs[0] + aVObs[2] * aCurrentTranslationPointA.Tr().x() + aVObs[3] * aCurrentTranslationPointB.Tr().x() + 
+                     aVObs[4] * aCurrentTranslationPointC.Tr().x();
+        auto aYTri = aVObs[1] + aVObs[2] * aCurrentTranslationPointA.Tr().y() + aVObs[3] * aCurrentTranslationPointB.Tr().y() + 
+                     aVObs[4] * aCurrentTranslationPointC.Tr().y();
 
         cPt2dr aComputedTranslatedPixel = cPt2dr(aXTri, aYTri);
 
@@ -198,7 +198,7 @@ namespace MMVII
         //----------- declaration of indicator of convergence
         double aSomDif = 0; // sum of difference between untranslated pixel and translated one.
         double aSomMod = 0; // sum of value of model, to normalize the difference
-        double aNbOut = 0;  // number of points out of image
+        double aNbOut = 0;  // number of translated pixels out of image
 
         // Parse all the point to add the observations on each point
         for (size_t aTr = 0; aTr < mDelTri.NbFace(); aTr++)
@@ -292,7 +292,8 @@ namespace MMVII
                 cPt2dr aDisplacedPoint = cPt2dr(aDisplacedPix.x(), aDisplacedPix.y());
                 mDImOut.SetV(cPt2di(aDisplacedPoint.x(), aDisplacedPoint.y()), mDImPost.DefGetVBL(aDisplacedPoint, 0));
             }
-
+            // StdOut() << "DEBUG " << __FILE__ << " " << __LINE__ << " Sz=" << Sz() << " P0=" << P0() << std::endl;
+            // StdOut() << "DEBUG " << __FILE__ << " " << __LINE__ << std::endl; getchar
             // cDataFileIm2D aDescFile = cDataFileIm2D::Create(mNamePostImage, false);
             mDImOut.ToFile("DisplacedPixels.tif"); //, aDescFile.Type());
         }
