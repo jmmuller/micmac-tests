@@ -178,7 +178,7 @@ template <class Type> void cMMV1_Conv<Type>::ReadWrite
                            )
 {
 
-// StdOut() <<  "aP0File,aP0File, " << aP0File << "\n";
+StdOut() << "DebugImage " << __LINE__ << " " << __FILE__ <<  "aP0File,aP0File, " << aP0File << "\n";
    Init_mm3d_In_MMVII();
    // C'est une image en originie (0,0) necessairement en MMV1
    const tImMMVII & aImV2 = *(aVecImV2.at(0));
@@ -241,6 +241,7 @@ template <class Type> void cMMV1_Conv<Type>::ReadWrite
            aTF.out()
       );
    }
+StdOut() << "DebugImage " << __LINE__ << " " << __FILE__ <<  "aP0File,aP0File, " << aP0File << "\n";
 }
 
 template <class Type> void cMMV1_Conv<Type>::ReadWrite
