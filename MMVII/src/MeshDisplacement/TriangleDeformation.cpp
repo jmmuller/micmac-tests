@@ -40,7 +40,7 @@ namespace MMVII
 
         void ConstructUniformRandomVectorAndApplyDelaunay();
         void GeneratePointsForDelaunay();
-        void OneIterationFitModele();
+        void OneIterationFitModele(bool aIsLastIter);
         cPt2dr ApplyBarycenterTranslationFormulaToFilledPixel(cHomot2D<tREAL8> & aCurrentTranslationPointA, cHomot2D<tREAL8> & aCurrentTranslationPointB, 
                                                               cHomot2D<tREAL8> & aCurrentTranslationPointC, std::vector<double> & aVObs); // new addition
 
@@ -48,12 +48,13 @@ namespace MMVII
         // ==    Mandatory args ====
         std::string mNamePreImage; //< Name of given pre-image.
         std::string mNamePostImage; //< Name of given post-image.
+        int mNumberPointsToGenerate;	 // number of generated points
+		int mRandomUniformLawUpperBound; // Uniform law generate numbers from [0, mRandomUniformLawUpperBound [
+        int mNumberOfOptimisationIterations; // number of iterations in optimisation process
 
         // ==    Optionnal args ====
         bool mShow; // print result, export image ...
         bool mGenerateDisplacementImage;
-        int mNumberPointsToGenerate;	 // number of generated points
-		int mRandomUniformLawUpperBound; // Uniform law generate numbers from [0, mRandomUniformLawUpperBound [
 
         // ==    Internal variables ====
 
@@ -69,8 +70,9 @@ namespace MMVII
         tIm mImOut;      ///<  memory representation of the image.
         tDIm &mDImOut;   ///<  memory representation of the image.
 
-        std::vector<cPt2dr> mVectorPts; // A vector containing a set of points
-        cTriangulation2D<tREAL8> mDelTri; // A Delaunay triangle
+        std::vector<cPt2dr> mVectorPts; // A vector containing a set of points.
+        cTriangulation2D<tREAL8> mDelTri; // A Delaunay triangle.
+        std::vector<cPt2dr> mFinalTranslatedPixelCoords; // Final translation coefficients.
 
         cResolSysNonLinear<tREAL8> *mSys; ///< Non Linear Sys for solving problem.
         cCalculator<double> *mEqHomTri;   ///< calculator giving access to values and derivatives.
@@ -119,12 +121,12 @@ namespace MMVII
                << Arg2007(mNamePreImage, "Name of pre-image file.", {{eTA2007::FileImage}, {eTA2007::FileDirProj}})
                << Arg2007(mNamePostImage, "Name of post-image file.", {eTA2007::FileImage})
                << Arg2007(mNumberPointsToGenerate, "Number of points you want to generate for triangulation.")
-			   << Arg2007(mRandomUniformLawUpperBound, "Maximum value that the uniform law can draw from.");
+			   << Arg2007(mRandomUniformLawUpperBound, "Maximum value that the uniform law can draw from.")
+               << Arg2007(mNumberOfOptimisationIterations, "Total number of iterations to run in optimisation process.");
     }
 
     cCollecSpecArg2007 &cAppli_cTriangleDeformation::ArgOpt(cCollecSpecArg2007 &anArgOpt)
     {
-
         return anArgOpt
                << AOpt2007(mShow, "Show", "Whether to print minimisation results.", {eTA2007::HDV})
                << AOpt2007(mGenerateDisplacementImage, "GenerateDisplacementImage", "Whether to generate and save an image having been translated.", {eTA2007::HDV});
@@ -175,10 +177,9 @@ namespace MMVII
         cPt2dr aComputedTranslatedPixel = cPt2dr(aXTri, aYTri);
 
         return aComputedTranslatedPixel;
-
     }
 
-    void cAppli_cTriangleDeformation::OneIterationFitModele()
+    void cAppli_cTriangleDeformation::OneIterationFitModele(bool aIsLastIter)
     {
         //----------- index of unkown, basic here because the unknown are the same for each equation
         std::vector<int> aVecInd{0, 1, 2, 3, 4, 5};
@@ -214,10 +215,12 @@ namespace MMVII
                 // prepare for barycenter translation formula by filling aVObs with different coordinates.
                 FormalInterpBarycenter_SetObs(aVObs, 0, aCompTri, aVectorToFillWithInsidePixels, aFilledPixel, mDImPre);
 
-                cPt2dr aTranslatedFilledPoint = ApplyBarycenterTranslationFormulaToFilledPixel(aCurTrPointA, aCurTrPointB, aCurTrPointC, aVObs); // image of a point in triangle by current homothety
-                if (mDImPost.InsideBL(aTranslatedFilledPoint))         // avoid error
+                // image of a point in triangle by current homothety
+                cPt2dr aTranslatedFilledPoint = ApplyBarycenterTranslationFormulaToFilledPixel(aCurTrPointA, aCurTrPointB, aCurTrPointC, aVObs);
+                if (mDImPost.InsideBL(aTranslatedFilledPoint)) // avoid error
                 {
-                    FormalBilinTri_SetObs(aVObs, TriangleDisplacement_NbObs, aTranslatedFilledPoint, mDImPost); // prepare for bilinear formula
+                    // prepare for application of bilinear formula
+                    FormalBilinTri_SetObs(aVObs, TriangleDisplacement_NbObs, aTranslatedFilledPoint, mDImPost);
 
                     // Now add observation
                     mSys->CalcAndAddObs(mEqHomTri, aVecInd, aVObs);
@@ -226,6 +229,9 @@ namespace MMVII
                     double aDif = mDImPre.GetVBL(cPt2dr(aVObs[0], aVObs[1])) - mDImPost.GetVBL(aTranslatedFilledPoint); // residual
                     aSomMod += mDImPost.GetV(cPt2di(aVObs[0], aVObs[1]));
                     aSomDif += std::abs(aDif);
+
+                    if (aIsLastIter && mGenerateDisplacementImage)
+                        mFinalTranslatedPixelCoords.push_back(aTranslatedFilledPoint);
                 }
                 else
                     aNbOut++;
@@ -236,7 +242,7 @@ namespace MMVII
         mSys->SolveUpdateReset();
 
         if (mShow)
-            StdOut() << " Dif= " << aSomDif / aSomMod << " NbOut= " << aNbOut << std::endl;
+            StdOut() << aSomDif / aSomMod << ", " << aNbOut << std::endl;
     }
 
     int cAppli_cTriangleDeformation::Exe()
@@ -257,34 +263,44 @@ namespace MMVII
         mDImOut = mImOut.DIm();
         mSzImOut = mDImPost.Sz();
         */
+        if (mShow)
+            StdOut() << "Diff," << "NbOut" << std::endl;
+
+        GeneratePointsForDelaunay();
+
+        // const int aNbIters = 20;
+        for (int aIter = 0; aIter < mNumberOfOptimisationIterations; aIter++)
+            OneIterationFitModele(aIter == (mNumberOfOptimisationIterations - 1));
+
         if (mGenerateDisplacementImage)
         {
             mImOut = tIm(mSzImPost);
             mDImOut = mImOut.DIm();
 
-        for (const auto &aNullPix : mDImPost)
-            mDImOut.SetV(aNullPix, 0);
+            for (const auto &aNullPix : mDImOut)
+                mDImOut.SetV(aNullPix, 0);
+
+            for (const auto &aDisplacedPix : mDImOut)
+            {
+                /*
+                tREAL8 aDx = aImDispx.DIm().GetV(aPix);
+                tREAL8 aDy = aImDispy.DIm().GetV(aPix);
+                cPt2dr aPixR = ToR(aPix) + cPt2dr(aDx, aDy);
+
+                mDImOut->SetV(aPix, mDImIn->DefGetVBL(aPixR, 0));
+                */
+                cPt2dr aDisplacedPoint = cPt2dr(aDisplacedPix.x(), aDisplacedPix.y());
+                mDImOut.SetV(cPt2di(aDisplacedPoint.x(), aDisplacedPoint.y()), mDImPost.DefGetVBL(aDisplacedPoint, 0));
+            }
+
+            // cDataFileIm2D aDescFile = cDataFileIm2D::Create(mNamePostImage, false);
+            mDImOut.ToFile("DisplacedPixels.tif"); //, aDescFile.Type());
         }
-        // mDImOut.ToFile("Null.tif");
-
-        GeneratePointsForDelaunay();
-
-        const int aNbIters = 8;
-        for (int aIter = 0; aIter < aNbIters; aIter++)
-            OneIterationFitModele();
-
-        /*
-        for (const auto &aDisplacedPix : mDImPre)
-        {
-            
-        }
-        */
-
         return EXIT_SUCCESS;
     }
 
     /********************************************/
-    /*              ::MMVII                     */
+    //              ::MMVII                     //
     /********************************************/
 
     tMMVII_UnikPApli Alloc_cTriangleDeformation(const std::vector<std::string> &aVArgs, const cSpecMMVII_Appli &aSpec)
