@@ -189,10 +189,8 @@ template <class Type> void cMMV1_Conv<Type>::ReadWrite
        aFoncImV1 = Virgule(aFoncImV1,ImToMMV1(*aVecImV2.at(aKIm)).in());
        aOutImV1  = Virgule( aOutImV1,ImToMMV1(*aVecImV2.at(aKIm)).out());
    }
-// StdOut() << "DebugImage " << __LINE__ << " SZZZ " << aVecImV2.size() << " READ=" << ReadMode << "\n";
-// StdOut() << "DebugImage " << __LINE__ << " SZZZ " << aVecImV2.at(0)->Sz() << "\n"; getchar();
    cRect2 aRectFullIm (cPt2di(0,0),aImV2.Sz());
-// StdOut() << "DebugImage " << __LINE__ << " " << __FILE__ <<  "aP0File,aP0File, " << aP0File << "\n";
+
    // Rectangle image / a un origine (0,0)
    cRect2 aRectIm =  (aR2Init== cRect2::TheEmptyBox)           ?  // Val par def
                      aRectFullIm                           :  // Rectangle en 00
@@ -313,8 +311,6 @@ template <class Type>  void  cDataIm2D<Type>::Write(const cDataFileIm2D & aFile,
      //cMMV1_Conv<Type>::ReadWrite(false,*this,aImG,aImB,aFile,aP0,aDyn,aR2);
        cMMV1_Conv<Type>::ReadWrite(false,*this,aImG,aImB,aFile,aP0,aDyn,aR2);
 }
-/*
-*/
 
 
 //  It's difficult to read unsigned int4 with micmac V1, wait for final implementation
