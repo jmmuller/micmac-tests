@@ -107,6 +107,10 @@ template <class Type>  bool   cTriangle2DCompiled<Type>::Insides(const tPt & aPt
 template <class Type> 
    void cTriangle2DCompiled<Type>::PixelsInside(std::vector<cPt2di> & aRes,double aTol,std::vector<t3Val> * aVW) const
 {
+// static int aCpt=0; aCpt++; StdOut() << "PixelsInsidePixelsInside : " << aCpt << "\n";
+// bool Bug= (aCpt==12);
+
+
    aRes.clear();
    cBox2di  aBPE = this->BoxPixEngl() ;
 
@@ -123,6 +127,7 @@ template <class Type>
 	{
             if ((aCXY.x()>=aTol)&&(aCXY.y()>=aTol)&&(aCXY.z()>=aTol))
 	    {
+// if (Bug)  StdOut()  << "PiiII : " << aRes.size() << "\n";
                 aRes.push_back(aPix);
 		if (aVW)
                    aVW->push_back(aCXY);
