@@ -177,8 +177,6 @@ template <class Type> void cMMV1_Conv<Type>::ReadWrite
                                const cRect2& aR2Init
                            )
 {
-
-StdOut() << "DebugImage " << __LINE__ << " " << __FILE__ <<  "aP0File,aP0File, " << aP0File << "\n";
    Init_mm3d_In_MMVII();
    // C'est une image en originie (0,0) necessairement en MMV1
    const tImMMVII & aImV2 = *(aVecImV2.at(0));
@@ -191,8 +189,10 @@ StdOut() << "DebugImage " << __LINE__ << " " << __FILE__ <<  "aP0File,aP0File, "
        aFoncImV1 = Virgule(aFoncImV1,ImToMMV1(*aVecImV2.at(aKIm)).in());
        aOutImV1  = Virgule( aOutImV1,ImToMMV1(*aVecImV2.at(aKIm)).out());
    }
+// StdOut() << "DebugImage " << __LINE__ << " SZZZ " << aVecImV2.size() << " READ=" << ReadMode << "\n";
+// StdOut() << "DebugImage " << __LINE__ << " SZZZ " << aVecImV2.at(0)->Sz() << "\n"; getchar();
    cRect2 aRectFullIm (cPt2di(0,0),aImV2.Sz());
-
+// StdOut() << "DebugImage " << __LINE__ << " " << __FILE__ <<  "aP0File,aP0File, " << aP0File << "\n";
    // Rectangle image / a un origine (0,0)
    cRect2 aRectIm =  (aR2Init== cRect2::TheEmptyBox)           ?  // Val par def
                      aRectFullIm                           :  // Rectangle en 00
@@ -241,7 +241,6 @@ StdOut() << "DebugImage " << __LINE__ << " " << __FILE__ <<  "aP0File,aP0File, "
            aTF.out()
       );
    }
-StdOut() << "DebugImage " << __LINE__ << " " << __FILE__ <<  "aP0File,aP0File, " << aP0File << "\n";
 }
 
 template <class Type> void cMMV1_Conv<Type>::ReadWrite
