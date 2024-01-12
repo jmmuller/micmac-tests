@@ -97,7 +97,14 @@ namespace MMVII
                                                                                               mEqHomTri(nullptr)
     {
         cDenseVect<double> aVInit(6);
-
+        /*
+        aVInit(0) = 0.05;
+        aVInit(1) = 0.01;
+        aVInit(2) = 0.08;
+        aVInit(3) = 0.06;
+        aVInit(4) = 0.07;
+        aVInit(5) = 0.04;
+        */
         aVInit(0) = 0;
         aVInit(1) = 0;
         aVInit(2) = 0;
@@ -243,6 +250,22 @@ namespace MMVII
 
         if (mShow)
             StdOut() << aSomDif / aSomMod << ", " << aNbOut << std::endl;
+
+        if (aIsLastIter)
+        {
+            cDenseVect<double> aVFinalSol = mSys->CurGlobSol();
+            // new addition
+            cHomot2D<tREAL8> aLastTrPointA(cPt2dr(aVFinalSol(0), aVFinalSol(1)), 0);    // final homothety translation point A
+            cHomot2D<tREAL8> aLastTrPointB(cPt2dr(aVFinalSol(2), aVFinalSol(3)), 0);    // final homothety translation point B
+            cHomot2D<tREAL8> aLastTrPointC(cPt2dr(aVFinalSol(4), aVFinalSol(5)), 0);    // final homothety translation point C
+
+            StdOut() << "Final translation on x-axis of Point A : " << aLastTrPointA.Tr().x() << " and " 
+                     << aLastTrPointA.Tr().y() << " for y-axis." << std::endl;
+            StdOut() << "Final translation on x-axis of Point B : " << aLastTrPointB.Tr().x() << " and " 
+                     << aLastTrPointB.Tr().y() << " for y-axis." << std::endl;
+            StdOut() << "Final translation on x-axis of Point C : " << aLastTrPointC.Tr().x() << " and " 
+                     << aLastTrPointC.Tr().y() << " for y-axis." << std::endl;
+        }
     }
 
     int cAppli_cTriangleDeformation::Exe()
