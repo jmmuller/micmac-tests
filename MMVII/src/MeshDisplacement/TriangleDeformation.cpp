@@ -45,7 +45,7 @@ namespace MMVII
                                                               cHomot2D<tREAL8> & aCurrentTranslationPointC, std::vector<double> & aVObs); // new addition
 
     private:
-        // ==    Mandatory args ====
+        // ==  Mandatory args ====
         std::string mNamePreImage; //< Name of given pre-image.
         std::string mNamePostImage; //< Name of given post-image.
         int mNumberPointsToGenerate;	 // number of generated points
@@ -212,12 +212,10 @@ namespace MMVII
         {
             const cTriangle<tREAL8, 2> aTri = mDelTri.KthTri(aTr);
 
-
             const cTriangle2DCompiled aCompTri(aTri);
-//StdOut()  << "TriiIiii "  <<  aCompTri.Pt(0) << aCompTri.Pt(1) << aCompTri.Pt(2) << "\n";
+
             std::vector<cPt2di> aVectorToFillWithInsidePixels;
 		    aCompTri.PixelsInside(aVectorToFillWithInsidePixels);
-//StdOut()  << "aCompTri.PixelsInsideaCompTri.PixelsInside\n";
 
             // long unsigned is necessary as there can be a lot of pixels in triangles.
             for (long unsigned int aFilledPixel=0; aFilledPixel < aVectorToFillWithInsidePixels.size(); aFilledPixel++) 
@@ -318,8 +316,6 @@ namespace MMVII
                 cPt2dr aDisplacedPoint = cPt2dr(aDisplacedPix.x(), aDisplacedPix.y());
                 mDImOut->SetV(cPt2di(aDisplacedPoint.x(), aDisplacedPoint.y()), mDImPost->DefGetVBL(aDisplacedPoint, 0));
             }
-            // StdOut() << "DEBUG " << __FILE__ << " " << __LINE__ << " Sz=" << Sz() << " P0=" << P0() << std::endl;
-            // StdOut() << "DEBUG " << __FILE__ << " " << __LINE__ << std::endl; getchar
             // cDataFileIm2D aDescFile = cDataFileIm2D::Create(mNamePostImage, false);
             mDImOut->ToFile("DisplacedPixels.tif"); //, aDescFile.Type());
         }
