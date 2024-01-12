@@ -60,15 +60,15 @@ namespace MMVII
 
         cPt2di mSzImPre; ///<  size of image.
         tIm mImPre;      ///<  memory representation of the image.
-        tDIm &mDImPre;   ///<  memory representation of the image.
+        tDIm *mDImPre;   ///<  memory representation of the image.
 
         cPt2di mSzImPost; ///<  size of image.
         tIm mImPost;      ///<  memory representation of the image.
-        tDIm &mDImPost;   ///<  memory representation of the image.
+        tDIm *mDImPost;   ///<  memory representation of the image.
 
         cPt2di mSzImOut; ///<  size of image.
         tIm mImOut;      ///<  memory representation of the image.
-        tDIm &mDImOut;   ///<  memory representation of the image.
+        tDIm *mDImOut;   ///<  memory representation of the image.
 
         std::vector<cPt2dr> mVectorPts; // A vector containing a set of points.
         cTriangulation2D<tREAL8> mDelTri; // A Delaunay triangle.
@@ -84,13 +84,13 @@ namespace MMVII
                                                                                               mGenerateDisplacementImage(false),
                                                                                               mSzImPre(cPt2di(1, 1)),
                                                                                               mImPre(mSzImPre),
-                                                                                              mDImPre(mImPre.DIm()),
+                                                                                              mDImPre( nullptr),
                                                                                               mSzImPost(cPt2di(1, 1)),
                                                                                               mImPost(mSzImPost),
-                                                                                              mDImPost(mImPost.DIm()),
+                                                                                              mDImPost(nullptr),
                                                                                               mSzImOut(cPt2di(1, 1)),
                                                                                               mImOut(mSzImOut),
-                                                                                              mDImOut(mImOut.DIm()),
+                                                                                              mDImOut(nullptr),
                                                                                               mVectorPts({cPt2dr(0, 0)}),
                                                                                               mDelTri(mVectorPts),
                                                                                               mSys(nullptr),
@@ -212,29 +212,32 @@ namespace MMVII
         {
             const cTriangle<tREAL8, 2> aTri = mDelTri.KthTri(aTr);
 
+
             const cTriangle2DCompiled aCompTri(aTri);
+//StdOut()  << "TriiIiii "  <<  aCompTri.Pt(0) << aCompTri.Pt(1) << aCompTri.Pt(2) << "\n";
             std::vector<cPt2di> aVectorToFillWithInsidePixels;
 		    aCompTri.PixelsInside(aVectorToFillWithInsidePixels);
+//StdOut()  << "aCompTri.PixelsInsideaCompTri.PixelsInside\n";
 
             // long unsigned is necessary as there can be a lot of pixels in triangles.
             for (long unsigned int aFilledPixel=0; aFilledPixel < aVectorToFillWithInsidePixels.size(); aFilledPixel++) 
             {
                 // prepare for barycenter translation formula by filling aVObs with different coordinates.
-                FormalInterpBarycenter_SetObs(aVObs, 0, aCompTri, aVectorToFillWithInsidePixels, aFilledPixel, mDImPre);
+                FormalInterpBarycenter_SetObs(aVObs, 0, aCompTri, aVectorToFillWithInsidePixels, aFilledPixel, *mDImPre);
 
                 // image of a point in triangle by current homothety
                 cPt2dr aTranslatedFilledPoint = ApplyBarycenterTranslationFormulaToFilledPixel(aCurTrPointA, aCurTrPointB, aCurTrPointC, aVObs);
-                if (mDImPost.InsideBL(aTranslatedFilledPoint)) // avoid error
+                if (mDImPost->InsideBL(aTranslatedFilledPoint)) // avoid error
                 {
                     // prepare for application of bilinear formula
-                    FormalBilinTri_SetObs(aVObs, TriangleDisplacement_NbObs, aTranslatedFilledPoint, mDImPost);
+                    FormalBilinTri_SetObs(aVObs, TriangleDisplacement_NbObs, aTranslatedFilledPoint, *mDImPost);
 
                     // Now add observation
                     mSys->CalcAndAddObs(mEqHomTri, aVecInd, aVObs);
 
                     // compute indicators
-                    double aDif = mDImPre.GetVBL(cPt2dr(aVObs[0], aVObs[1])) - mDImPost.GetVBL(aTranslatedFilledPoint); // residual
-                    aSomMod += mDImPost.GetV(cPt2di(aVObs[0], aVObs[1]));
+                    double aDif = mDImPre->GetVBL(cPt2dr(aVObs[0], aVObs[1])) - mDImPost->GetVBL(aTranslatedFilledPoint); // residual
+                    aSomMod += mDImPost->GetV(cPt2di(aVObs[0], aVObs[1]));
                     aSomDif += std::abs(aDif);
 
                     if (aIsLastIter && mGenerateDisplacementImage)
@@ -276,11 +279,11 @@ namespace MMVII
 
         // cDataFileIm2D aDescFile = cDataFileIm2D::Create(mNamePreImage, false);
 
-        mDImPre = mImPre.DIm();
-        mSzImPre = mDImPre.Sz();
+        mDImPre = &(mImPre.DIm());
+        mSzImPre = (mDImPre->Sz());
 
-        mDImPost = mImPost.DIm();
-        mSzImPost = mDImPost.Sz();
+        mDImPost = &(mImPost.DIm());
+        mSzImPost = mDImPost->Sz();
 
         /*
         mDImOut = mImOut.DIm();
@@ -298,12 +301,12 @@ namespace MMVII
         if (mGenerateDisplacementImage)
         {
             mImOut = tIm(mSzImPost);
-            mDImOut = mImOut.DIm();
+            mDImOut = &mImOut.DIm();
 
-            for (const auto &aNullPix : mDImOut)
-                mDImOut.SetV(aNullPix, 0);
+            for (const auto &aNullPix : *mDImOut)
+                mDImOut->SetV(aNullPix, 0);
 
-            for (const auto &aDisplacedPix : mDImOut)
+            for (const auto &aDisplacedPix : *mDImOut)
             {
                 /*
                 tREAL8 aDx = aImDispx.DIm().GetV(aPix);
@@ -313,12 +316,12 @@ namespace MMVII
                 mDImOut->SetV(aPix, mDImIn->DefGetVBL(aPixR, 0));
                 */
                 cPt2dr aDisplacedPoint = cPt2dr(aDisplacedPix.x(), aDisplacedPix.y());
-                mDImOut.SetV(cPt2di(aDisplacedPoint.x(), aDisplacedPoint.y()), mDImPost.DefGetVBL(aDisplacedPoint, 0));
+                mDImOut->SetV(cPt2di(aDisplacedPoint.x(), aDisplacedPoint.y()), mDImPost->DefGetVBL(aDisplacedPoint, 0));
             }
             // StdOut() << "DEBUG " << __FILE__ << " " << __LINE__ << " Sz=" << Sz() << " P0=" << P0() << std::endl;
             // StdOut() << "DEBUG " << __FILE__ << " " << __LINE__ << std::endl; getchar
             // cDataFileIm2D aDescFile = cDataFileIm2D::Create(mNamePostImage, false);
-            mDImOut.ToFile("DisplacedPixels.tif"); //, aDescFile.Type());
+            mDImOut->ToFile("DisplacedPixels.tif"); //, aDescFile.Type());
         }
         return EXIT_SUCCESS;
     }
