@@ -295,6 +295,7 @@ namespace MMVII
             if (mGenerateDisplacementImage)
                 mDImOut->ToFile("DisplacedPixels.tif");
         }
+
     }
 
     //-----------------------------------------
