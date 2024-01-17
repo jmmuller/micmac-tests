@@ -7,6 +7,8 @@
 #include "MMVII_Ptxd.h"
 #include "MMVII_Geom2D.h"
 
+#include "../src/MeshDisplacement/TriangleDeformation.h"
+
 /**
  \file MMVII_TplSymbTriangle.h
  \brief Contains helpers for triangle as formula
@@ -68,26 +70,20 @@ namespace MMVII
     //  standard name for observation
     std::vector<std::string> FormalBilinIm2D_NameObs(const std::string &aPrefix);
 
-    template <class Type, class TypeIm>
+    template <class Type>
     void FormalInterpBarycenter_SetObs(
         std::vector<Type> &aVObs,     // vector of observation to fill
         const size_t aK0,                   // first index where fill the vector
-        const cTriangle2DCompiled<tREAL8> & aCompTri, // a compiled triangle
-        const std::vector<cPt2di> & aVectorFilledwithInsidePixels, // vector containing pixels insisde triangles
-        const long unsigned int aFilledPixel, // a counter that is looping over pixels in triangles
-        const cDataIm2D<TypeIm> &aDIm // image
+        const cPtInsideTriangles & aPixInsideTriangle
     )
     {
-        const cPt2dr aFilledPoint(aVectorFilledwithInsidePixels[aFilledPixel].x(), aVectorFilledwithInsidePixels[aFilledPixel].y());
-        const cPt3dr aBarycenterCoordinates = aCompTri.CoordBarry(aFilledPoint);
         // push integer coordinate of point
-        SetOrPush(aVObs, aK0, Type(aFilledPoint.x()));
-        SetOrPush(aVObs, aK0 + 1, Type(aFilledPoint.y()));
-        SetOrPush(aVObs, aK0 + 2, Type(aBarycenterCoordinates.x()));
-        SetOrPush(aVObs, aK0 + 3, Type(aBarycenterCoordinates.y()));
-        SetOrPush(aVObs, aK0 + 4, Type(aBarycenterCoordinates.z()));
-        SetOrPush(aVObs, aK0 + 5, (Type)aDIm.GetV(cPt2di(aVectorFilledwithInsidePixels[aFilledPixel].x(), 
-                                                         aVectorFilledwithInsidePixels[aFilledPixel].y())));
+        SetOrPush(aVObs, aK0, Type(aPixInsideTriangle.GetCartesianCoordinates().x()));
+        SetOrPush(aVObs, aK0 + 1, Type(aPixInsideTriangle.GetCartesianCoordinates().y()));
+        SetOrPush(aVObs, aK0 + 2, Type(aPixInsideTriangle.GetBarycenterCoordinates().x()));
+        SetOrPush(aVObs, aK0 + 3, Type(aPixInsideTriangle.GetBarycenterCoordinates().y()));
+        SetOrPush(aVObs, aK0 + 4, Type(aPixInsideTriangle.GetBarycenterCoordinates().z()));
+        SetOrPush(aVObs, aK0 + 5, Type(aPixInsideTriangle.GetPixelValue()));
     }
 
     /* 

@@ -17,7 +17,6 @@ using namespace NS_SymbolicDerivative;
 
 namespace MMVII
 {
-
   class cTriangleDeformation
   {
   public:
@@ -25,14 +24,15 @@ namespace MMVII
     {
     }
 
-    static const std::vector<std::string> VNamesUnknowns() { return {"GeomTrXPointA", "GeomTrYPointA", "GeomTrXPointB", "GeomTrYPointB", "GeomTrXPointC", "GeomTrYPointC"}; }
+    static const std::vector<std::string> VNamesUnknowns() { return Append(std::vector<std::string>{"GeomTrXPointA", "GeomTrYPointA"}, 
+                                                                           std::vector<std::string>{"GeomTrXPointB", "GeomTrYPointB"},
+                                                                           std::vector<std::string>{"GeomTrXPointC", "GeomTrYPointC"});}
     static const std::vector<std::string> VNamesObs() 
     {
       return Append
                   (
                     std::vector<std::string>{"PixelCoordinatesX", "PixelCoordinatesY", "AlphaCoordPixel", "BetaCoordPixel", "GammaCoordPixel", "IntensityImPre"},
                     FormalBilinIm2D_NameObs("T")  // 6 obs for bilinear interpol of Im
-                     // std::vector<std::string>{"xMod","yMod","ValueMod"} // x,y of point, value of modele
                   );
     }
 
@@ -40,7 +40,7 @@ namespace MMVII
 
     template <typename tUk, typename tObs>
     static std::vector<tUk> formula(
-        const std::vector<tUk> &aVUk,
+        const std::vector<tUk> &aVUnk,
         const std::vector<tObs> &aVObs) // const
     {
       size_t IndTri = 0;
@@ -48,35 +48,32 @@ namespace MMVII
 
       // extract observation on model
 
-      const auto &aXCoordinates = aVObs[IndTri];
-      const auto &aYCoordinates = aVObs[IndTri + 1];
+      const auto &aXCoordinate = aVObs[IndTri];
+      const auto &aYCoordinate = aVObs[IndTri + 1];
       const auto &aAlphaCoordinate = aVObs[IndTri + 2];
       const auto &aBetaCoordinate = aVObs[IndTri + 3];
-      const auto &aGammaCoordinate = aVObs[IndTri + 4]; // change here
+      const auto &aGammaCoordinate = aVObs[IndTri + 4];
       const auto &aIntensityImPre = aVObs[IndTri + 5];
-
-      // const auto &aComputedXCoordinate = aVObs[IndTri + 6];
-      // const auto &aComputedYCoordinate = aVObs[IndTri + 7];  // Only these variables are needed for application of bilinear formula.
 
       // extract unknowns
       // const auto &aRadSc = aVUk[0];
-      // const auto &aRadTr = aVUk[0];
-      // const auto &aGeomScale = aVUk[1];
+      // const auto &aRadTr = aVUnk[0];
+      // const auto &aGeomScale = aVUnk[1];
 
-      const auto &aGeomTrXPointA = aVUk[0]; // change here
-      const auto &aGeomTrYPointA = aVUk[1];
-      const auto &aGeomTrXPointB = aVUk[2];
-      const auto &aGeomTrYPointB = aVUk[3];
-      const auto &aGeomTrXPointC = aVUk[4];
-      const auto &aGeomTrYPointC = aVUk[5];
+      const auto &aGeomTrXPointA = aVUnk[0];
+      const auto &aGeomTrYPointA = aVUnk[0];
+      const auto &aGeomTrXPointB = aVUnk[1];
+      const auto &aGeomTrYPointB = aVUnk[1];
+      const auto &aGeomTrXPointC = aVUnk[2];
+      const auto &aGeomTrYPointC = aVUnk[2];
 
-      auto aXTri = aXCoordinates + aAlphaCoordinate * aGeomTrXPointA + aBetaCoordinate * aGeomTrXPointB + aGammaCoordinate * aGeomTrXPointC; // change
-      auto aYTri = aYCoordinates + aAlphaCoordinate * aGeomTrYPointA + aBetaCoordinate * aGeomTrYPointB + aGammaCoordinate * aGeomTrYPointC; // change
+      auto aXTri = aXCoordinate + aAlphaCoordinate * aGeomTrXPointA + aBetaCoordinate * aGeomTrXPointB + aGammaCoordinate * aGeomTrXPointC;
+      auto aYTri = aYCoordinate + aAlphaCoordinate * aGeomTrYPointA + aBetaCoordinate * aGeomTrYPointB + aGammaCoordinate * aGeomTrYPointC;
 
       // compute formula of bilinear interpolation
       auto aEstimatedValueTri = FormalBilinTri_Formula(aVObs, TriangleDisplacement_NbObs, aXTri, aYTri);
 
-      // residual is simply the difference between both values
+      // residual is simply the difference between values in before image and estimated value in new image.
       return {aIntensityImPre - aEstimatedValueTri};
     }
   };
