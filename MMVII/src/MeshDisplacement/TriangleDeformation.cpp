@@ -33,10 +33,9 @@ namespace MMVII
                                          aVectorFilledwithInsidePixels[aFilledPixel].y()));
     }
 
-    cPt3dr cPtInsideTriangles::GetBarycenterCoordinates() const {return mBarycenterCoordinatesOfPixel;} // Accessor
-    cPt2dr cPtInsideTriangles::GetCartesianCoordinates() const {return mFilledPoint;}                   // Accessor
-    tREAL8 cPtInsideTriangles::GetPixelValue() const {return mValueOfPixel;}                            // Accessor
-
+    cPt3dr cPtInsideTriangles::GetBarycenterCoordinates() const { return mBarycenterCoordinatesOfPixel; } // Accessor
+    cPt2dr cPtInsideTriangles::GetCartesianCoordinates() const { return mFilledPoint; }                   // Accessor
+    tREAL8 cPtInsideTriangles::GetPixelValue() const { return mValueOfPixel; }                            // Accessor
 
     /********************************************/
     /*                                          */
@@ -91,8 +90,8 @@ namespace MMVII
 
     void cAppli_cTriangleDeformation::ConstructUniformRandomVectorAndApplyDelaunay()
     {
-        mVectorPts.pop_back(); // eliminate initialisation values.
-        // Generate coordinates from drawing lines and columns of coordinates from a uniform distribution.
+        mVectorPts.pop_back(); // eliminate initialisation values
+        // Generate coordinates from drawing lines and columns of coordinates from a uniform distribution
         for (int aNbPt = 0; aNbPt < mNumberPointsToGenerate; aNbPt++)
         {
             const double aUniformRandomLine = RandUnif_N(mRandomUniformLawUpperBound);
@@ -107,7 +106,10 @@ namespace MMVII
 
     void cAppli_cTriangleDeformation::GeneratePointsForDelaunay()
     {
-        mRandomUniformLawUpperBound = std::min(mSzImPre.y(), mSzImPre.x());
+        // If user hasn't defined another value than the default value, it is changed
+        if (mRandomUniformLawUpperBound == 20)
+            // Maximum value of coordinates are drawn from [0, MinimumSizeBetweenLinesAndColumnsOfPreImage[
+            mRandomUniformLawUpperBound = std::min(mSzImPre.y(), mSzImPre.x());
 
         ConstructUniformRandomVectorAndApplyDelaunay();
     }
@@ -125,7 +127,7 @@ namespace MMVII
         // auto aXTri = aXCoordinates + aAlphaCoordinate * aGeomTrXPointA + aBetaCoordinate * aGeomTrXPointB + aGammaCoordinate * aGeomTrXPointC;
         // auto aYTri = aYCoordinates + aAlphaCoordinate * aGeomTrYPointA + aBetaCoordinate * aGeomTrYPointB + aGammaCoordinate * aGeomTrYPointC;
 
-        // apply barycenter translation formula for x and y on current observations.
+        // apply current barycenter translation formula for x and y on current observations.
         auto aXTri = aVObs[0] + aVObs[2] * aCurrentTranslationPointA.Tr().x() + aVObs[3] * aCurrentTranslationPointB.Tr().x() +
                      aVObs[4] * aCurrentTranslationPointC.Tr().x();
         auto aYTri = aVObs[1] + aVObs[2] * aCurrentTranslationPointA.Tr().y() + aVObs[3] * aCurrentTranslationPointB.Tr().y() +
@@ -136,23 +138,23 @@ namespace MMVII
         return aComputedTranslatedPixel;
     }
 
-    void cAppli_cTriangleDeformation::DoOneIteration(bool aIsLastIter)
+    void cAppli_cTriangleDeformation::LoopOverTrianglesAndUpdateParameters(const bool aIsLastIter)
     {
         //----------- allocate vec of obs :
         std::vector<double> aVObs(12, 0.0); // 6 for ImagePre interpolation and 6 for ImagePost
 
         //----------- extract current parameters
-        cDenseVect<double> aVCur = mSys->CurGlobSol();
+        cDenseVect<double> aVCur = mSys->CurGlobSol();           // Get current solution.
         // double aCurScR = aVCur(0);                            // current scale on radiometry
         // double aCurTrR = aVCur(1);                            // current translation on radiometry
-
         //----------- declaration of indicator of convergence
         double aSomDif = 0; // sum of difference between untranslated pixel and translated one.
         double aNbOut = 0;  // number of translated pixels out of image
-        
-        size_t aTotalNumberOfInsidePixels=0;
-        
-        // Parse all the point to add the observations on each point
+
+        // Count number of pixels inside triangles for normalisation
+        size_t aTotalNumberOfInsidePixels = 0;
+
+        // Loop over all triangles to add the observations on each point
         for (size_t aTr = 0; aTr < mDelTri.NbFace(); aTr++)
         {
             // if (mDelTri.ValidFace())
@@ -164,26 +166,27 @@ namespace MMVII
             std::vector<cPt2di> aVectorToFillWithInsidePixels;
             aCompTri.PixelsInside(aVectorToFillWithInsidePixels);
 
-            //----------- index of unkown, finds the pixels 
-            std::vector<int> aVecInd = {2*aIndicesOfTriKnots.x(), 2*aIndicesOfTriKnots.x() + 1, 
-                                        2*aIndicesOfTriKnots.y(), 2*aIndicesOfTriKnots.y() + 1,
-                                        2*aIndicesOfTriKnots.z(), 2*aIndicesOfTriKnots.z() + 1};
+            //----------- index of unkown, finds the pixels
+            std::vector<int> aVecInd = {2 * aIndicesOfTriKnots.x(), 2 * aIndicesOfTriKnots.x() + 1,
+                                        2 * aIndicesOfTriKnots.y(), 2 * aIndicesOfTriKnots.y() + 1,
+                                        2 * aIndicesOfTriKnots.z(), 2 * aIndicesOfTriKnots.z() + 1};
 
-            tHomot2d aCurTrPointA(cPt2dr(aVCur(aVecInd.at(0)), aVCur(aVecInd.at(1))), 0); // current homothety translation point A
-            tHomot2d aCurTrPointB(cPt2dr(aVCur(aVecInd.at(2)), aVCur(aVecInd.at(3))), 0); // current homothety translation point B
-            tHomot2d aCurTrPointC(cPt2dr(aVCur(aVecInd.at(4)), aVCur(aVecInd.at(5))), 0); // current homothety translation point C
+            tHomot2d aCurTrPointA(cPt2dr(aVCur(aVecInd.at(0)), aVCur(aVecInd.at(1))), 0); // current homothety translation 1st point of triangle
+            tHomot2d aCurTrPointB(cPt2dr(aVCur(aVecInd.at(2)), aVCur(aVecInd.at(3))), 0); // current homothety translation 2nd point of triangle
+            tHomot2d aCurTrPointC(cPt2dr(aVCur(aVecInd.at(4)), aVCur(aVecInd.at(5))), 0); // current homothety translation 3rd point of triangle
 
             size_t aNumberOfInsidePixels = aVectorToFillWithInsidePixels.size();
-            // size_t is necessary as there can be a lot of pixels in triangles.
+            // Loop over all pixels inside triangle
+            // size_t is necessary as there can be a lot of pixels in triangles
             for (size_t aFilledPixel = 0; aFilledPixel < aNumberOfInsidePixels; aFilledPixel++)
             {
                 const cPtInsideTriangles aPixInsideTriangle = cPtInsideTriangles(aCompTri, aVectorToFillWithInsidePixels, aFilledPixel, *mDImPre);
-                // prepare for barycenter translation formula by filling aVObs with different coordinates.
+                // prepare for barycenter translation formula by filling aVObs with different coordinates
                 FormalInterpBarycenter_SetObs(aVObs, 0, aPixInsideTriangle);
 
                 // image of a point in triangle by current homothety
-                cPt2dr aTranslatedFilledPoint = ApplyBarycenterTranslationFormulaToFilledPixel(aCurTrPointA, aCurTrPointB, aCurTrPointC, aVObs);
-                if (mDImPost->InsideBL(aTranslatedFilledPoint)) // avoid error
+                const cPt2dr aTranslatedFilledPoint = ApplyBarycenterTranslationFormulaToFilledPixel(aCurTrPointA, aCurTrPointB, aCurTrPointC, aVObs);
+                if (mDImPost->InsideBL(aTranslatedFilledPoint)) // avoid errors
                 {
                     // prepare for application of bilinear formula
                     FormalBilinTri_SetObs(aVObs, TriangleDisplacement_NbObs, aTranslatedFilledPoint, *mDImPost);
@@ -197,11 +200,11 @@ namespace MMVII
 
                     if (aIsLastIter && mGenerateDisplacementImage)
                         mFinalTranslatedPixelCoords.push_back(aTranslatedFilledPoint);
-                    
+
                     aTotalNumberOfInsidePixels += aNumberOfInsidePixels;
                 }
                 else
-                    aNbOut++;
+                    aNbOut++; // Count number of pixels translated outside post image
             }
         }
 
@@ -210,11 +213,18 @@ namespace MMVII
 
         if (mShow)
             StdOut() << aSomDif / aTotalNumberOfInsidePixels << ", " << aNbOut << std::endl;
+    }
 
+    void cAppli_cTriangleDeformation::DoOneIteration(bool aIsLastIter)
+    {
+
+        LoopOverTrianglesAndUpdateParameters(aIsLastIter); // Iterate over triangles and solve system
+
+        // Show final translation results
         if (aIsLastIter && mShow)
         {
             cDenseVect<double> aVFinalSol = mSys->CurGlobSol();
-            // new addition
+
             tHomot2d aLastTrPointA(cPt2dr(aVFinalSol(0), aVFinalSol(1)), 0); // final homothety translation point 1
             tHomot2d aLastTrPointB(cPt2dr(aVFinalSol(2), aVFinalSol(3)), 0); // final homothety translation point 2
             tHomot2d aLastTrPointC(cPt2dr(aVFinalSol(4), aVFinalSol(5)), 0); // final homothety translation point 3
@@ -226,7 +236,6 @@ namespace MMVII
             StdOut() << "Final translation on x-axis of the 3rd point : " << aLastTrPointC.Tr().x() << " and "
                      << aLastTrPointC.Tr().y() << " for y-axis." << std::endl;
         }
-
     }
 
     int cAppli_cTriangleDeformation::Exe()
@@ -272,7 +281,7 @@ namespace MMVII
                 cPt2dr aDisplacedPoint = cPt2dr(aDisplacedPix.x(), aDisplacedPix.y());
                 mDImOut->SetV(cPt2di(aDisplacedPoint.x(), aDisplacedPoint.y()), mDImPost->DefGetVBL(aDisplacedPoint, 0));
             }
-            // cDataFileIm2D aDescFile = cDataFileIm2D::Create(mNamePostImage, false);
+
             mDImOut->ToFile("DisplacedPixels.tif"); //, aDescFile.Type());
         }
         return EXIT_SUCCESS;
