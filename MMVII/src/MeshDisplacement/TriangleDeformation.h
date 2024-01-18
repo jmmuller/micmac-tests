@@ -55,6 +55,7 @@ namespace MMVII
         void ConstructUniformRandomVectorAndApplyDelaunay();
         void GeneratePointsForDelaunay();
         void DoOneIteration(bool aIsLastIter);
+        void LoopOverTrianglesAndUpdateParameters(const bool aIsLastIter);
         void InitialisationAfterExe();
         cPt2dr ApplyBarycenterTranslationFormulaToFilledPixel(tHomot2d &aCurrentTranslationPointA, tHomot2d &aCurrentTranslationPointB,
                                                               tHomot2d &aCurrentTranslationPointC, std::vector<double> &aVObs);
