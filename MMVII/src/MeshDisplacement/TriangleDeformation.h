@@ -43,6 +43,7 @@ namespace MMVII
         typedef cDataIm2D<tREAL8> tDIm;
         typedef cTriangle<tREAL8, 2> tTri2dr;
         typedef cHomot2D<tREAL8> tHomot2d;
+        typedef cDenseVect<double> tDensevect;
 
         cAppli_cTriangleDeformation(const std::vector<std::string> &aVArgs,
                                     const cSpecMMVII_Appli &aSpec);

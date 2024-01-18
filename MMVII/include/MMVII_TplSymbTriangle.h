@@ -20,7 +20,8 @@ using namespace NS_SymbolicDerivative;
 namespace MMVII
 {
 
-    /** Compute a the formula for composition of a function and an image.
+    /** 
+    Compute a the formula for composition of a function and an image.
 
      Let I be an image, considered as function  R2->R using an interpolation model, this compute
      the formula corresponding to the fonction
@@ -94,8 +95,8 @@ namespace MMVII
     template <class Type, class TypeIm>
     void FormalBilinTri_SetObs(
         std::vector<Type> &aVObs,     // vector of observation to fill
-        size_t aK0,                   // first index where fill the vector
-        cPt2dr aPtIm,                 // point in image
+        const size_t aK0,                   // first index where fill the vector
+        const cPt2dr aPtIm,                 // point in image
         const cDataIm2D<TypeIm> &aDIm // image
     )
     {

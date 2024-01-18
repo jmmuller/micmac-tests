@@ -2,7 +2,6 @@
 #define _FORMULA_TRIANGLES_DEFORM_H_
 
 #include "MMVII_TplSymbTriangle.h"
-// #include "MMVII_TplSymbImage.h"
 #include "MMVII_util_tpl.h"
 
 #include "SymbDer/SymbolicDerivatives.h"
@@ -10,7 +9,7 @@
 
 /**
     \file   Formulas_TrianglesDeform.h
-    \brief  class to generate code for triangle transformation by minimization
+    \brief  class to generate code for triangle deformation by minimization
 **/
 
 using namespace NS_SymbolicDerivative;
@@ -24,9 +23,9 @@ namespace MMVII
     {
     }
 
-    static const std::vector<std::string> VNamesUnknowns() { return Append(std::vector<std::string>{"GeomTrXPointA", "GeomTrYPointA"}, 
-                                                                           std::vector<std::string>{"GeomTrXPointB", "GeomTrYPointB"},
-                                                                           std::vector<std::string>{"GeomTrXPointC", "GeomTrYPointC"});}
+    static const std::vector<std::string> VNamesUnknowns() {return Append(std::vector<std::string>{"GeomTrXPointA", "GeomTrYPointA"}, 
+                                                                          std::vector<std::string>{"GeomTrXPointB", "GeomTrYPointB"},
+                                                                          std::vector<std::string>{"GeomTrXPointC", "GeomTrYPointC"});}
     static const std::vector<std::string> VNamesObs() 
     {
       return Append
@@ -36,7 +35,7 @@ namespace MMVII
                   );
     }
 
-    std::string FormulaName() const { return "TriangleDeformation"; }
+    std::string FormulaName() const {return "TriangleDeformation";}
 
     template <typename tUk, typename tObs>
     static std::vector<tUk> formula(

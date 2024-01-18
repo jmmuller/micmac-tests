@@ -116,7 +116,7 @@ namespace MMVII
 
     void cAppli_cTriangleDeformation::InitialisationAfterExe()
     {
-        cDenseVect<double> aVInit(2 * mDelTri.NbPts(), eModeInitImage::eMIA_Null);
+        tDensevect aVInit(2 * mDelTri.NbPts(), eModeInitImage::eMIA_Null);
 
         mSys = new cResolSysNonLinear<tREAL8>(eModeSSR::eSSR_LsqDense, aVInit);
     }
@@ -144,7 +144,7 @@ namespace MMVII
         std::vector<double> aVObs(12, 0.0); // 6 for ImagePre interpolation and 6 for ImagePost
 
         //----------- extract current parameters
-        cDenseVect<double> aVCur = mSys->CurGlobSol();           // Get current solution.
+        tDensevect aVCur = mSys->CurGlobSol();           // Get current solution.
         // double aCurScR = aVCur(0);                            // current scale on radiometry
         // double aCurTrR = aVCur(1);                            // current translation on radiometry
         //----------- declaration of indicator of convergence
@@ -217,24 +217,20 @@ namespace MMVII
 
     void cAppli_cTriangleDeformation::DoOneIteration(bool aIsLastIter)
     {
-
         LoopOverTrianglesAndUpdateParameters(aIsLastIter); // Iterate over triangles and solve system
 
         // Show final translation results
         if (aIsLastIter && mShow)
         {
-            cDenseVect<double> aVFinalSol = mSys->CurGlobSol();
+            tDensevect aVFinalSol = mSys->CurGlobSol();
 
-            tHomot2d aLastTrPointA(cPt2dr(aVFinalSol(0), aVFinalSol(1)), 0); // final homothety translation point 1
-            tHomot2d aLastTrPointB(cPt2dr(aVFinalSol(2), aVFinalSol(3)), 0); // final homothety translation point 2
-            tHomot2d aLastTrPointC(cPt2dr(aVFinalSol(4), aVFinalSol(5)), 0); // final homothety translation point 3
+            for (size_t aLastTrCoordinate=0; aLastTrCoordinate < mDelTri.NbPts(); aLastTrCoordinate++)
+            {
+                tHomot2d aLastTrPoint(cPt2dr(aVFinalSol(2*aLastTrCoordinate), aVFinalSol(2*aLastTrCoordinate + 1)), 0); // final homothety translation for points in triangulation
 
-            StdOut() << "Final translation on x-axis of the 1st point : " << aLastTrPointA.Tr().x() << " and "
-                     << aLastTrPointA.Tr().y() << " for y-axis." << std::endl;
-            StdOut() << "Final translation on x-axis of the 2nd point : " << aLastTrPointB.Tr().x() << " and "
-                     << aLastTrPointB.Tr().y() << " for y-axis." << std::endl;
-            StdOut() << "Final translation on x-axis of the 3rd point : " << aLastTrPointC.Tr().x() << " and "
-                     << aLastTrPointC.Tr().y() << " for y-axis." << std::endl;
+                StdOut() << "The un-translated point has the following coordinates : " << mDelTri.KthPts(aLastTrCoordinate) << ". The final translation on x-axis of this point is : " 
+                         << aLastTrPoint.Tr().x() << " on the x-axis and " << aLastTrPoint.Tr().y() << " for y-axis." << std::endl;                         
+            }
         }
     }
 
@@ -252,7 +248,7 @@ namespace MMVII
 
         if (mShow)
             StdOut() << "Diff,"
-                     << "NbOut" << std::endl;
+                     << " NbOut" << std::endl;
 
         GeneratePointsForDelaunay();
 
@@ -269,21 +265,27 @@ namespace MMVII
             for (const auto &aNullPix : *mDImOut)
                 mDImOut->SetV(aNullPix, 0);
 
-            for (const auto &aDisplacedPix : *mDImOut)
+            std::vector<cPt2dr> AllPixCoordinatesInImOut;
+            for (int aPixXCoord=0; aPixXCoord < mDImOut->Sz().x(); aPixXCoord++)
             {
-                /*
-                tREAL8 aDx = aImDispx.DIm().GetV(aPix);
-                tREAL8 aDy = aImDispy.DIm().GetV(aPix);
-                cPt2dr aPixR = ToR(aPix) + cPt2dr(aDx, aDy);
-
-                mDImOut->SetV(aPix, mDImIn->DefGetVBL(aPixR, 0));
-                */
-                cPt2dr aDisplacedPoint = cPt2dr(aDisplacedPix.x(), aDisplacedPix.y());
-                mDImOut->SetV(cPt2di(aDisplacedPoint.x(), aDisplacedPoint.y()), mDImPost->DefGetVBL(aDisplacedPoint, 0));
+                for (int aPixYCoord=0; aPixYCoord < mDImOut->Sz().y(); aPixYCoord++)
+                    AllPixCoordinatesInImOut.push_back(cPt2dr(aPixXCoord, aPixYCoord));
             }
 
-            mDImOut->ToFile("DisplacedPixels.tif"); //, aDescFile.Type());
+            for (const auto &aDisplacedPix : mFinalTranslatedPixelCoords)
+            {
+                cPt2dr aDisplacedPoint = cPt2dr(aDisplacedPix.x(), aDisplacedPix.y());
+                if (std::find(AllPixCoordinatesInImOut.begin(), AllPixCoordinatesInImOut.end(), 
+                              aDisplacedPoint) != AllPixCoordinatesInImOut.end())
+                    mDImOut->SetV(cPt2di(aDisplacedPoint.x(), aDisplacedPoint.y()), 
+                                  mDImPost->DefGetVBL(aDisplacedPoint, 0));
+                else
+                    mDImOut->SetV(cPt2di(aDisplacedPoint.x(), aDisplacedPoint.y()), mDImPost->DefGetVBL(aDisplacedPoint, 0));
+            }
+
+            mDImOut->ToFile("DisplacedPixels.tif");
         }
+
         return EXIT_SUCCESS;
     }
 
