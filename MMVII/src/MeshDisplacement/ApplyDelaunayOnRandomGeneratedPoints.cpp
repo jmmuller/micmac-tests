@@ -24,6 +24,7 @@ namespace MMVII
 	public:
 		typedef cIm2D<tREAL4> tIm;
 		typedef cDataIm2D<tREAL4> tDIm;
+		typedef cTriangulation2D<tREAL8> tTriangule2dr;
 
 		cAppli_RandomGeneratedDelaunay(const std::vector<std::string> &aVArgs,
 									   const cSpecMMVII_Appli &aSpec);
@@ -41,18 +42,21 @@ namespace MMVII
 
 	private:
 		// ==   Mandatory args ====
+		
+		std::string mNameInputImage;
 		std::string mNamePlyFile;
 		int mNumberPointsToGenerate;	 // number of generated points
-		int mRandomUniformLawUpperBound; // Uniform law generate numbers from [0, mRandomUniformLawUpperBound [
-		std::string mNameInputImage;
 
 		// ==   Optionnal args ====
 
+		int mRandomUniformLawUpperBoundXAxis; // Uniform law generate numbers from [0, mRandomUniformLawUpperBound [ for x-axis
+		int mRandomUniformLawUpperBoundYAxis; // Uniform law generate numbers from [0, mRandomUniformLawUpperBound [ for y-axis
 		bool mPlyFileisBinary;
 		bool mShiftTriangles;
 		std::string mNameModifedTrianglePlyFile;
 
 		// ==    Internal variables ====
+		
 		tIm mImIn;    ///<  memory representation of the image
         tDIm *mDImIn; ///<  memory representation of the image
         cPt2di mSz; // Size of images
@@ -61,6 +65,8 @@ namespace MMVII
 
 	cAppli_RandomGeneratedDelaunay::cAppli_RandomGeneratedDelaunay(const std::vector<std::string> &aVArgs,
 																   const cSpecMMVII_Appli &aSpec) : cMMVII_Appli(aVArgs, aSpec),
+																   									mRandomUniformLawUpperBoundXAxis(1),
+																									mRandomUniformLawUpperBoundYAxis(1),
 																									mPlyFileisBinary(false),
 																									mShiftTriangles(true),
 																									mImIn(cPt2di(1, 1)),
@@ -73,13 +79,14 @@ namespace MMVII
 		return anArgObl
 			   << Arg2007(mNameInputImage, "Name of input image file.", {{eTA2007::FileImage}, {eTA2007::FileDirProj}})
 			   << Arg2007(mNamePlyFile, "Name of main triangulation file to save in .ply format.", {{eTA2007::FileCloud}})
-			   << Arg2007(mNumberPointsToGenerate, "Number of points you want to generate for triangulation.")
-			   << Arg2007(mRandomUniformLawUpperBound, "Maximum value that the uniform law can draw from.");
+			   << Arg2007(mNumberPointsToGenerate, "Number of points you want to generate for triangulation.");
 	}
 
 	cCollecSpecArg2007 &cAppli_RandomGeneratedDelaunay::ArgOpt(cCollecSpecArg2007 &anArgOpt)
 	{
 		return anArgOpt
+				<< AOpt2007(mRandomUniformLawUpperBoundXAxis, "RandomUniformLawXAxis", "Maximum value that the uniform law can draw from for x-axis.", {eTA2007::HDV})
+				<< AOpt2007(mRandomUniformLawUpperBoundYAxis, "RandomUniformLawYAxis", "Maximum value that the uniform law can draw from for y-axis.", {eTA2007::HDV})
 				<< AOpt2007(mShiftTriangles, "ShiftTriangles", "Whether to shift points of triangles after application of Delaunay triangulation.", {eTA2007::HDV})
 				<< AOpt2007(mPlyFileisBinary, "PlyFileIsBinary", "Whether to save the .ply file binarised or not.", {eTA2007::HDV})
 				<< AOpt2007(mNameModifedTrianglePlyFile, "NamePlyFileShiftedTriangles", "Name of .ply file for shifted triangles.", {eTA2007::FileCloud});
@@ -128,7 +135,7 @@ namespace MMVII
 
 	void cAppli_RandomGeneratedDelaunay::ApplyAndSaveDelaunayTriangulationOnPoints()
 	{
-		cTriangulation2D<tREAL8> aDelTri(mVectorPts);
+		tTriangule2dr aDelTri(mVectorPts);
 
 		aDelTri.MakeDelaunay();
 
@@ -142,15 +149,15 @@ namespace MMVII
 			if (mShiftTriangles)
 			{
 				// for colouring points in representation
-				double aUniformRandomRedChannel = RandUnif_N(256);
-				double aUniformRandomGreenChannel = RandUnif_N(256);
-				double aUniformRandomBlueChannel = RandUnif_N(256);
+				const double aUniformRandomRedChannel = RandUnif_N(256);
+				const double aUniformRandomGreenChannel = RandUnif_N(256);
+				const double aUniformRandomBlueChannel = RandUnif_N(256);
 				ComputeShiftedTrianglesAndPoints(aTri, ShiftedTriangleCoordinates, aUniformRandomRedChannel, 
 												 aUniformRandomGreenChannel, aUniformRandomBlueChannel);
 			}
 		}
 
-		cTriangulation2D<tREAL8> aModifiedDelTri(ShiftedTriangleCoordinates);
+		tTriangule2dr aModifiedDelTri(ShiftedTriangleCoordinates);
 
 		aModifiedDelTri.MakeDelaunay();
 
@@ -164,23 +171,33 @@ namespace MMVII
 		// Generate coordinates from drawing lines and columns of coordinates from a uniform distribution
 		for (int aNbPt = 0; aNbPt < mNumberPointsToGenerate; aNbPt++)
 		{
-			const double aUniformRandomLine = RandUnif_N(mRandomUniformLawUpperBound);
-			const double aUniformRandomCol = RandUnif_N(mRandomUniformLawUpperBound);
-			const cPt2dr aUniformRandomPt(aUniformRandomLine, aUniformRandomCol);
+			const double aUniformRandomXAxis = RandUnif_N(mRandomUniformLawUpperBoundXAxis);
+			const double aUniformRandomYAxis = RandUnif_N(mRandomUniformLawUpperBoundYAxis);
+			const cPt2dr aUniformRandomPt(aUniformRandomXAxis, aUniformRandomYAxis); // cPt2dr format
 			mVectorPts.push_back(aUniformRandomPt);
 		}
 	}
 
 	void cAppli_RandomGeneratedDelaunay::GeneratePointsForDelaunay()
 	{
-		const int aMinimumLinCol = std::min(mSz.y(), mSz.x());
+		// If user hasn't defined another value than the default value, it is changed
+        if (mRandomUniformLawUpperBoundXAxis == 1 && mRandomUniformLawUpperBoundXAxis == 1)
+        {
+            // Maximum value of coordinates are drawn from [0, NumberOfImageLines[
+            mRandomUniformLawUpperBoundXAxis = mSz.x();
+			mRandomUniformLawUpperBoundYAxis = mSz.y();            
+        }
+        else
+        {
+            if (mRandomUniformLawUpperBoundXAxis != 1 && mRandomUniformLawUpperBoundYAxis == 1)
+                mRandomUniformLawUpperBoundYAxis = mSz.y();
+            else
+            {
+                if (mRandomUniformLawUpperBoundXAxis == 1 && mRandomUniformLawUpperBoundYAxis != 1)
+                    mRandomUniformLawUpperBoundXAxis = mSz.x();
+            }
+        }
 
-		// make sure that values greater than image size can't be drawn from uniform law.
-		while (mRandomUniformLawUpperBound >= aMinimumLinCol)
-		{
-			StdOut() << "Maximum value drawn from uniform law needs to be smaller than " << aMinimumLinCol << "." << std::endl;
-			std::cin >> mRandomUniformLawUpperBound;
-		}
 		ConstructUniformRandomVector();
 
 		ApplyAndSaveDelaunayTriangulationOnPoints(); // Apply Delaunay triangulation on generated points.

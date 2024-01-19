@@ -18,7 +18,7 @@ namespace MMVII
         public:
             cPtInsideTriangles(const cTriangle2DCompiled<tREAL8> & aCompTri, // a compiled triangle.
                              const std::vector<cPt2di> & aVectorFilledwithInsidePixels, // vector containing pixels inside triangles.
-                             const long unsigned int aFilledPixel, // a counter that is looping over pixels in triangles.
+                             const size_t aFilledPixel, // a counter that is looping over pixels in triangles.
                              const cDataIm2D<tREAL8> &aDIm); // image.
             cPt3dr GetBarycenterCoordinates() const;
             cPt2dr GetCartesianCoordinates() const;
@@ -26,7 +26,7 @@ namespace MMVII
 
         private:
             cPt3dr mBarycenterCoordinatesOfPixel; // Barycentric coordinates of pixel.
-            cPt2dr mFilledPoint; // 2D cartesian coordinates of pixel.
+            cPt2dr mFilledIndices; // 2D cartesian coordinates of pixel.
             tREAL8 mValueOfPixel; // Intensity in image at pixel.
     };
 
@@ -55,6 +55,7 @@ namespace MMVII
 
         void ConstructUniformRandomVectorAndApplyDelaunay();
         void GeneratePointsForDelaunay();
+        void SubtractPrePostImageAndComputeAvgAndMax();
         void DoOneIteration(bool aIsLastIter);
         void LoopOverTrianglesAndUpdateParameters(const bool aIsLastIter);
         void InitialisationAfterExe();
@@ -69,30 +70,35 @@ namespace MMVII
         int mNumberOfOptimisationIterations; // number of iterations in optimisation process
 
         // ==  Optionnal args ====
-        int mRandomUniformLawUpperBound;     // Uniform law generate numbers from [0, mRandomUniformLawUpperBound [
+        int mRandomUniformLawUpperBoundLines;    // Uniform law generates random coordinates in interval [0, mRandomUniformLawUpperBoundLines [
+        int mRandomUniformLawUpperBoundCols;     // Uniform law generates random coordinates in interval [0, mRandomUniformLawUpperBoundCols [
         bool mShow; // print result, export image ...
-        bool mGenerateDisplacementImage;
+        bool mGenerateDisplacementImage; // Generate image with displaced pixels
 
         // ==  Internal variables ====
 
-        cPt2di mSzImPre; ///<  size of image.
-        tIm mImPre;      ///<  memory representation of the image.
-        tDIm *mDImPre;   ///<  memory representation of the image.
+        cPt2di mSzImPre; ///<  size of image
+        tIm mImPre;      ///<  memory representation of the image
+        tDIm *mDImPre;   ///<  memory representation of the image
 
-        cPt2di mSzImPost; ///<  size of image.
-        tIm mImPost;      ///<  memory representation of the image.
-        tDIm *mDImPost;   ///<  memory representation of the image.
+        cPt2di mSzImPost; ///<  size of image
+        tIm mImPost;      ///<  memory representation of the image
+        tDIm *mDImPost;   ///<  memory representation of the image
 
-        cPt2di mSzImOut; ///<  size of image.
-        tIm mImOut;      ///<  memory representation of the image.
-        tDIm *mDImOut;   ///<  memory representation of the image.
+        cPt2di mSzImOut; ///<  size of image
+        tIm mImOut;      ///<  memory representation of the image
+        tDIm *mDImOut;   ///<  memory representation of the image
 
-        std::vector<cPt2dr> mVectorPts;                  // A vector containing a set of points.
-        cTriangulation2D<tREAL8> mDelTri;                // A Delaunay triangle.
-        std::vector<cPt2dr> mFinalTranslatedPixelCoords; // Final translation coefficients.
+        cPt2di mSzImDiff; ///<  size of image
+        tIm mImDiff;      ///<  memory representation of the image
+        tDIm *mDImDiff;   ///<  memory representation of the image
 
-        cResolSysNonLinear<tREAL8> *mSys; ///< Non Linear Sys for solving problem.
-        cCalculator<double> *mEqHomTri;   ///< calculator giving access to values and derivatives.
+        std::vector<cPt2dr> mVectorPts;                  // A vector containing a set of points
+        cTriangulation2D<tREAL8> mDelTri;                // A Delaunay triangle
+        std::vector<cPt2dr> mFinalTranslatedPixelCoords; // Final translation coefficients
+
+        cResolSysNonLinear<tREAL8> *mSys; ///< Non Linear Sys for solving problem
+        cCalculator<double> *mEqHomTri;   ///< calculator giving access to values and derivatives
     };
 }
 
