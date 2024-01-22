@@ -46,7 +46,6 @@ namespace MMVII
       // size_t IndX = IndTri + TriangleDisplacement_NbObs;
 
       // extract observation on model
-
       const auto &aXCoordinate = aVObs[IndTri];
       const auto &aYCoordinate = aVObs[IndTri + 1];
       const auto &aAlphaCoordinate = aVObs[IndTri + 2];
