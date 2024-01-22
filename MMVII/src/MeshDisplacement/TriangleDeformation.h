@@ -15,19 +15,19 @@ namespace MMVII
     /****************************************/
     class cPtInsideTriangles
     {
-        public:
-            cPtInsideTriangles(const cTriangle2DCompiled<tREAL8> & aCompTri, // a compiled triangle.
-                             const std::vector<cPt2di> & aVectorFilledwithInsidePixels, // vector containing pixels inside triangles.
-                             const size_t aFilledPixel, // a counter that is looping over pixels in triangles.
-                             const cDataIm2D<tREAL8> &aDIm); // image.
-            cPt3dr GetBarycenterCoordinates() const;
-            cPt2dr GetCartesianCoordinates() const;
-            tREAL8 GetPixelValue() const;
+    public:
+        cPtInsideTriangles(const cTriangle2DCompiled<tREAL8> &aCompTri,              // a compiled triangle.
+                           const std::vector<cPt2di> &aVectorFilledwithInsidePixels, // vector containing pixels inside triangles.
+                           const size_t aFilledPixel,                                // a counter that is looping over pixels in triangles.
+                           const cDataIm2D<tREAL8> &aDIm);                           // image.
+        cPt3dr GetBarycenterCoordinates() const;
+        cPt2dr GetCartesianCoordinates() const;
+        tREAL8 GetPixelValue() const;
 
-        private:
-            cPt3dr mBarycenterCoordinatesOfPixel; // Barycentric coordinates of pixel.
-            cPt2dr mFilledIndices; // 2D cartesian coordinates of pixel.
-            tREAL8 mValueOfPixel; // Intensity in image at pixel.
+    private:
+        cPt3dr mBarycenterCoordinatesOfPixel; // Barycentric coordinates of pixel.
+        cPt2dr mFilledIndices;                // 2D cartesian coordinates of pixel.
+        tREAL8 mValueOfPixel;                 // Intensity in image at pixel.
     };
 
     /********************************************/
@@ -56,11 +56,11 @@ namespace MMVII
         void ConstructUniformRandomVectorAndApplyDelaunay();
         void GeneratePointsForDelaunay();
         void SubtractPrePostImageAndComputeAvgAndMax();
-        void DoOneIteration(bool aIsLastIter);
+        void DoOneIteration(const bool aIsLastIter);
         void LoopOverTrianglesAndUpdateParameters(const bool aIsLastIter);
         void InitialisationAfterExe();
-        cPt2dr ApplyBarycenterTranslationFormulaToFilledPixel(tHomot2d &aCurrentTranslationPointA, tHomot2d &aCurrentTranslationPointB,
-                                                              tHomot2d &aCurrentTranslationPointC, std::vector<double> &aVObs);
+        cPt2dr ApplyBarycenterTranslationFormulaToFilledPixel(const tHomot2d &aCurrentTranslationPointA, const tHomot2d &aCurrentTranslationPointB,
+                                                              const tHomot2d &aCurrentTranslationPointC, std::vector<double> &aVObs);
 
     private:
         // ==  Mandatory args ====
@@ -70,10 +70,10 @@ namespace MMVII
         int mNumberOfOptimisationIterations; // number of iterations in optimisation process
 
         // ==  Optionnal args ====
-        int mRandomUniformLawUpperBoundLines;    // Uniform law generates random coordinates in interval [0, mRandomUniformLawUpperBoundLines [
-        int mRandomUniformLawUpperBoundCols;     // Uniform law generates random coordinates in interval [0, mRandomUniformLawUpperBoundCols [
-        bool mShow; // print result, export image ...
-        bool mGenerateDisplacementImage; // Generate image with displaced pixels
+        int mRandomUniformLawUpperBoundLines; // Uniform law generates random coordinates in interval [0, mRandomUniformLawUpperBoundLines [
+        int mRandomUniformLawUpperBoundCols;  // Uniform law generates random coordinates in interval [0, mRandomUniformLawUpperBoundCols [
+        bool mShow;                           // print result, export image ...
+        bool mGenerateDisplacementImage;      // Generate image with displaced pixels
 
         // ==  Internal variables ====
 
