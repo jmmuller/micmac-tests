@@ -74,7 +74,7 @@ namespace MMVII
     template <class Type>
     void FormalInterpBarycenter_SetObs(
         std::vector<Type> &aVObs,     // vector of observation to fill
-        const size_t aK0,                   // first index where fill the vector
+        const int aK0,                   // first index where fill the vector
         const cPtInsideTriangles & aPixInsideTriangle
     )
     {
@@ -88,14 +88,14 @@ namespace MMVII
     }
 
     /* 
-    This is the "companion" function of  FormalBilinIm2D_Formula, it fills
-    the vector aVObs with X0,Y0,I00, that will be used in FormalBilinIm2D_Formula.
+    This is the "companion" function of  FormalBilinTri_Formula, it fills
+    the vector aVObs with X0,Y0,I00, that will be used in FormalBilinTri_Formula.
     */
 
     template <class Type, class TypeIm>
     void FormalBilinTri_SetObs(
         std::vector<Type> &aVObs,     // vector of observation to fill
-        const size_t aK0,                   // first index where fill the vector
+        const int aK0,                   // first index where fill the vector
         const cPt2dr aPtIm,                 // point in image
         const cDataIm2D<TypeIm> &aDIm // image
     )

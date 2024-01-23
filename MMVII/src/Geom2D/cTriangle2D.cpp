@@ -70,15 +70,17 @@ namespace MMVII
         MMVII_INTERNAL_ASSERT_tiny(Regular(), "Non regular triangle");
     }
 
-    template <class Type>
-    cTriangle2DCompiled<Type>
-    cTriangle2DCompiled<Type>::RandomRegularTri(Type aSz, Type aEps)
-    {
-        cTriangle2DCompiled<Type> aTri(tPt::PRandC() * aSz, tPt::PRandC() * aSz, tPt::PRandC() * aSz);
-        if (std::abs(aTri.mDelta) > aSz * aEps)
-            return aTri;
-        return RandomRegularTri(aSz, aEps);
-    }
+template <class Type> cTriangle2DCompiled<Type> 
+                      cTriangle2DCompiled<Type>::RandomRegularTri(Type aSz,Type aEps)
+{
+   auto v1 = tPt::PRandC()*aSz;
+   auto v2 = tPt::PRandC()*aSz;
+   auto v3 = tPt::PRandC()*aSz;
+   cTriangle2DCompiled<Type> aTri(v1,v2,v3);
+   if (std::abs(aTri.mDelta)> aSz*aEps)
+      return aTri;
+   return RandomRegularTri(aSz,aEps);
+}
 
     template <class Type>
     cPtxd<Type, 3>
@@ -158,12 +160,14 @@ namespace MMVII
         cPtxd<Type, 2> aPB = cPtxd<Type, 2>::PCste(2 * aSz);
         cTplBox<Type, 2> aBox(-aPB, aPB);
 
-        for (int aK = 0; aK < 1000; aK++)
-        {
-            // cPt2dr aP1 = aBox.GeneratePointInside();
-            cPtxd<Type, 2> aP1(RandUnif_C() * 2 * aSz, RandUnif_C() * 2 * aSz);
-            cPtxd<Type, 3> aCoBa = aTri.CoordBarry(aP1);
-            cPtxd<Type, 2> aP2 = aTri.FromCoordBarry(aCoBa);
+    for (int aK=0 ; aK<1000 ; aK++)
+    {
+        // cPt2dr aP1 = aBox.GeneratePointInside();
+        auto v1 = RandUnif_C()*2*aSz;
+        auto v2 = RandUnif_C()*2*aSz;
+        cPtxd<Type,2> aP1 (v1,v2);
+        cPtxd<Type,3> aCoBa = aTri.CoordBarry(aP1);
+        cPtxd<Type,2> aP2 = aTri.FromCoordBarry(aCoBa);
 
             Type aDist = Norm2(aP1 - aP2) / aSz;
             Type aEps = tElemNumTrait<Type>::Accuracy();
