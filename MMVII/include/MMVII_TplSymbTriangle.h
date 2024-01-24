@@ -20,15 +20,15 @@ using namespace NS_SymbolicDerivative;
 namespace MMVII
 {
 
-    /** 
-    Compute a the formula for composition of a function and an image.
+    /**
+    Compute the formula for composition of a function and an image.
 
-     Let I be an image, considered as function  R2->R using an interpolation model, this compute
-     the formula corresponding to the fonction
+     Let I be an image, considered as function  R^2 -> R using an interpolation model, this computes
+     the formula corresponding to the function
 
           x,y  ->   I(Fx(x,y),Fy(x,y))
 
-     We use here the bilinear interpolation.  Let X0,Y0 be integer such that:
+     We use here the bilinear interpolation.  Let X0,Y0 be integers such that:
 
              X0 <= Fx(x,y) < X0+1
              Y0 <= Fy(x,y) < Y0+1
@@ -73,10 +73,9 @@ namespace MMVII
 
     template <class Type>
     void FormalInterpBarycenter_SetObs(
-        std::vector<Type> &aVObs,     // vector of observation to fill
-        const int aK0,                   // first index where fill the vector
-        const cPtInsideTriangles & aPixInsideTriangle
-    )
+        std::vector<Type> &aVObs, // vector of observation to fill
+        const int aK0,            // first index where fill the vector
+        const cPtInsideTriangles &aPixInsideTriangle)
     {
         // push integer coordinate of point
         SetOrPush(aVObs, aK0, Type(aPixInsideTriangle.GetCartesianCoordinates().x()));
@@ -87,7 +86,7 @@ namespace MMVII
         SetOrPush(aVObs, aK0 + 5, Type(aPixInsideTriangle.GetPixelValue()));
     }
 
-    /* 
+    /*
     This is the "companion" function of  FormalBilinTri_Formula, it fills
     the vector aVObs with X0,Y0,I00, that will be used in FormalBilinTri_Formula.
     */
@@ -95,8 +94,8 @@ namespace MMVII
     template <class Type, class TypeIm>
     void FormalBilinTri_SetObs(
         std::vector<Type> &aVObs,     // vector of observation to fill
-        const int aK0,                   // first index where fill the vector
-        const cPt2dr aPtIm,                 // point in image
+        const int aK0,                // first index where fill the vector
+        const cPt2dr aPtIm,           // point in image
         const cDataIm2D<TypeIm> &aDIm // image
     )
     {
@@ -114,7 +113,7 @@ namespace MMVII
         SetOrPush(aVObs, aK0 + 5, (Type)aDIm.GetV(aP0 + cPt2di(1, 1)));
     }
 
-    constexpr size_t TriangleDisplacement_NbObs = 6;
+    constexpr int TriangleDisplacement_NbObs = 6;
 };
 
 #endif //  _MMVII_TplSymbTriangle_
