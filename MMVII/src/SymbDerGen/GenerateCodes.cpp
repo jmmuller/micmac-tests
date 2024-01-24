@@ -497,10 +497,11 @@ cCalculator<double> * EqSumSquare(int aNb,bool WithDerive,int aSzBuf,bool ReUse)
         // =========== Data ========
         // Mandatory args
         std::string mDirGenCode;
-        void GenerateOneDist(const cPt3di & aDeg,bool isFraserMode) ;
-        template <typename tProj> void GenerateCodeProjCentralPersp();
-        template <typename tProj> void GenerateCodeCamPerpCentrale(const cPt3di &,bool IsFraserMode);
-
+        void GenerateOneDist(const cPt3di &aDeg, bool isFraserMode);
+        template <typename tProj>
+        void GenerateCodeProjCentralPersp();
+        template <typename tProj>
+        void GenerateCodeCamPerpCentrale(const cPt3di &, bool IsFraserMode);
 
         eProjPC mTypeProj;
     };
@@ -559,8 +560,8 @@ cCalculator<double> * EqSumSquare(int aNb,bool WithDerive,int aSzBuf,bool ReUse)
 
         GenCodesFormula((tREAL8 *)nullptr, anEqDist, false); //  Dist without derivative
         GenCodesFormula((tREAL8 *)nullptr, anEqDist, true);  //  Dist with derivative
-        // GenCodesFormula((tREAL8*)nullptr,anEqIntr,false);  //  Proj without derivative
-        // GenCodesFormula((tREAL8*)nullptr,anEqIntr,true);   //  Proj with derivative
+                                                             // GenCodesFormula((tREAL8*)nullptr,anEqIntr,false);  //  Proj without derivative
+                                                             // GenCodesFormula((tREAL8*)nullptr,anEqIntr,true);   //  Proj with derivative
 
         // Generate the base of all functions
         cMMVIIUnivDist aDistBase(aDeg.x(), aDeg.y(), aDeg.z(), true, isFraserMode);
@@ -646,12 +647,12 @@ cCalculator<double> * EqSumSquare(int aNb,bool WithDerive,int aSzBuf,bool ReUse)
 
         GenerateCodeCamPerpCentrale<cProjFE_EquiDist>(cPt3di(3, 1, 1), true);
 
-   for (const auto WithDer : {true,false})
-   {
+        for (const auto WithDer : {true, false})
+        {
        GenCodesFormula((tREAL8*)nullptr,cFormulaSumSquares(8),WithDer); // RIGIDBLOC
 
-       GenCodesFormula((tREAL8*)nullptr,cFormulaBlocRigid(),WithDer); // RIGIDBLOC
-       GenCodesFormula((tREAL8*)nullptr,cFormulaRattBRExist(),WithDer); // RIGIDBLOC
+            GenCodesFormula((tREAL8 *)nullptr, cFormulaBlocRigid(), WithDer);   // RIGIDBLOC
+            GenCodesFormula((tREAL8 *)nullptr, cFormulaRattBRExist(), WithDer); // RIGIDBLOC
 
             // cDist2DConservation aD2C;
             GenCodesFormula((tREAL8 *)nullptr, cDist2DConservation(), WithDer);
