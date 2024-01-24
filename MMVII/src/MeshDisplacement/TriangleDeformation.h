@@ -93,6 +93,14 @@ namespace MMVII
         tIm mImDiff;      ///<  memory representation of the image
         tDIm *mDImDiff;   ///<  memory representation of the image
 
+        cPt2di mSzImDepX; ///<  size of image
+        tIm mImDepX;      ///<  memory representation of the image
+        tDIm *mDImDepX;   ///<  memory representation of the image
+
+        cPt2di mSzImDepY; ///<  size of image
+        tIm mImDepY;      ///<  memory representation of the image
+        tDIm *mDImDepY;   ///<  memory representation of the image
+
         std::vector<cPt2dr> mVectorPts;                  // A vector containing a set of points
         cTriangulation2D<tREAL8> mDelTri;                // A Delaunay triangle
         std::vector<cPt2dr> mFinalTranslatedPixelCoords; // Final translation coefficients

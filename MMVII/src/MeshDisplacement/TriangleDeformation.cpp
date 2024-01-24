@@ -60,6 +60,12 @@ namespace MMVII
                                                                                               mSzImDiff(cPt2di(1, 1)),
                                                                                               mImDiff(mSzImDiff),
                                                                                               mDImDiff(nullptr),
+                                                                                              mSzImDepX(cPt2di(1, 1)),
+                                                                                              mImDepX(mSzImDepX),
+                                                                                              mDImDepX(nullptr),
+                                                                                              mSzImDepY(cPt2di(1, 1)),
+                                                                                              mImDepY(mSzImDepY),
+                                                                                              mDImDepY(nullptr),
                                                                                               mVectorPts({cPt2dr(0, 0)}),
                                                                                               mDelTri(mVectorPts),
                                                                                               mSys(nullptr),
@@ -94,6 +100,9 @@ namespace MMVII
 
     void cAppli_cTriangleDeformation::ConstructUniformRandomVectorAndApplyDelaunay()
     {
+		// Use current time as seed for random generator 
+    	// srand(time(0));
+
         mVectorPts.pop_back(); // eliminate initialisation values
         // Generate coordinates from drawing lines and columns of coordinates from a uniform distribution
         for (int aNbPt = 0; aNbPt < mNumberPointsToGenerate; aNbPt++)
@@ -169,10 +178,10 @@ namespace MMVII
         // auto aYTri = aYCoordinates + aAlphaCoordinate * aGeomTrYPointA + aBetaCoordinate * aGeomTrYPointB + aGammaCoordinate * aGeomTrYPointC;
 
         // apply current barycenter translation formula for x and y on current observations.
-        auto aXTri = aVObs[0] + aVObs[2] * aCurrentTranslationPointA.Tr().x() + aVObs[3] * aCurrentTranslationPointB.Tr().x() +
-                     aVObs[4] * aCurrentTranslationPointC.Tr().x();
-        auto aYTri = aVObs[1] + aVObs[2] * aCurrentTranslationPointA.Tr().y() + aVObs[3] * aCurrentTranslationPointB.Tr().y() +
-                     aVObs[4] * aCurrentTranslationPointC.Tr().y();
+        tREAL8 aXTri = aVObs[0] + aVObs[2] * aCurrentTranslationPointA.Tr().x() + aVObs[3] * aCurrentTranslationPointB.Tr().x() +
+                       aVObs[4] * aCurrentTranslationPointC.Tr().x();
+        tREAL8 aYTri = aVObs[1] + aVObs[2] * aCurrentTranslationPointA.Tr().y() + aVObs[3] * aCurrentTranslationPointB.Tr().y() +
+                       aVObs[4] * aCurrentTranslationPointC.Tr().y();
 
         cPt2dr aComputedTranslatedPixel = cPt2dr(aXTri, aYTri);
 
@@ -266,18 +275,68 @@ namespace MMVII
 
             if (mGenerateDisplacementImage)
             {
-                mImOut = tIm(mSzImPost);
+                mImOut = tIm(mSzImPre);
                 mDImOut = &mImOut.DIm();
-                /*
-                for (const auto &aOutPix : *mDImOut)
-                    mDImOut->SetV(cPt2di(aOutPix.x(), aOutPix.y()),
-                                  mDImPost->GetV(aOutPix));
-                */
-                for (const auto &aNullPix : *mDImOut)
-                    mDImOut->SetV(cPt2di(aNullPix.x(), aNullPix.y()),
-                                  0);
-            }
 
+                mImDepX = tIm(mSzImPre);
+                mDImDepX = &mImDepX.DIm();
+
+                mImDepY = tIm(mSzImPre);
+                mDImDepY = &mImDepY.DIm();
+
+                std::vector<double> aLastVObs(12, 0.0);
+
+                for (const cPt2di &aOutPix : *mDImOut)
+                    mDImOut->SetV(aOutPix, mDImPre->GetV(aOutPix));
+
+                for (size_t aLTr = 0; aLTr < mDelTri.NbFace(); aLTr++)
+                {
+                    const tTri2dr aLastTri = mDelTri.KthTri(aLTr);
+                    const cPt3di aLastIndicesOfTriKnots = mDelTri.KthFace(aLTr);
+
+                    const cTriangle2DCompiled aLastCompTri(aLastTri);
+
+                    std::vector<cPt2di> aLastVectorToFillWithInsidePixels;
+                    aLastCompTri.PixelsInside(aLastVectorToFillWithInsidePixels);
+
+                    const std::vector<int> aLastVecInd = {2 * aLastIndicesOfTriKnots.x(), 2 * aLastIndicesOfTriKnots.x() + 1,
+                                                          2 * aLastIndicesOfTriKnots.y(), 2 * aLastIndicesOfTriKnots.y() + 1,
+                                                          2 * aLastIndicesOfTriKnots.z(), 2 * aLastIndicesOfTriKnots.z() + 1};
+
+                    const tHomot2d aLastCurTrPointA(cPt2dr(aVFinalSol(aLastVecInd.at(0)), 
+                                                           aVFinalSol(aLastVecInd.at(1))), 0); // current homothety translation 1st point of triangle
+                    const tHomot2d aLastCurTrPointB(cPt2dr(aVFinalSol(aLastVecInd.at(2)), 
+                                                           aVFinalSol(aLastVecInd.at(3))), 0); // current homothety translation 2nd point of triangle
+                    const tHomot2d aLastCurTrPointC(cPt2dr(aVFinalSol(aLastVecInd.at(4)), 
+                                                           aVFinalSol(aLastVecInd.at(5))), 0); // current homothety translation 3rd point of triangle
+
+                    const size_t aLastNumberOfInsidePixels = aLastVectorToFillWithInsidePixels.size();
+
+                    for (size_t aLastFilledPixel = 0; aLastFilledPixel < aLastNumberOfInsidePixels; aLastFilledPixel++)
+                    {
+                        const cPtInsideTriangles aPixInsideTriangle = cPtInsideTriangles(aLastCompTri, aLastVectorToFillWithInsidePixels, 
+                                                                                        aLastFilledPixel, *mDImPre);
+                        // prepare for barycenter translation formula by filling aVObs with different coordinates
+                        FormalInterpBarycenter_SetObs(aLastVObs, 0, aPixInsideTriangle);
+
+                        // image of a point in triangle by current homothety
+                        const cPt2dr aLastTranslatedFilledPoint = ApplyBarycenterTranslationFormulaToFilledPixel(aLastCurTrPointA, aLastCurTrPointB, 
+                                                                                                                 aLastCurTrPointC, aLastVObs);
+                        tREAL8 aXCoordinates = aPixInsideTriangle.GetCartesianCoordinates().x();
+                        tREAL8 aYCoordinates = aPixInsideTriangle.GetCartesianCoordinates().y();
+                        mDImDepX->SetV(cPt2di(aXCoordinates, aYCoordinates),
+                                       aLastTranslatedFilledPoint.x() - aXCoordinates);
+                        mDImDepY->SetV(cPt2di(aXCoordinates, aYCoordinates),
+                                       aLastTranslatedFilledPoint.y() - aYCoordinates);
+                    }
+                }
+
+                for (const cPt2di & aDepPix: *mDImOut)
+                    mDImOut->SetV(aDepPix, mDImPre->GetV(cPt2di(aDepPix.x() + mDImDepX->GetV(aDepPix),
+                                                                aDepPix.y() + mDImDepY->GetV(aDepPix))));                
+                mDImOut->ToFile("DisplacedPixels.tif");
+            }
+            /*
             for (size_t aLastTrCoordinate = 0; aLastTrCoordinate < mDelTri.NbPts(); aLastTrCoordinate++)
             {
                 const tHomot2d aLastTrPoint(cPt2dr(aVFinalSol(2 * aLastTrCoordinate), aVFinalSol(2 * aLastTrCoordinate + 1)), 0); // final homothety translation for points in triangulation
@@ -288,12 +347,11 @@ namespace MMVII
                          << aLastTrPoint.Tr().x() << " on the x-axis and " << aLastTrPoint.Tr().y() << " for y-axis." << std::endl;
 
                 if (mGenerateDisplacementImage)
-                    mDImOut->SetV(cPt2di(aUntranslatedCoord.x() + aLastTrPoint.Tr().x(), aUntranslatedCoord.y() + aLastTrPoint.Tr().y()),
-                                  mDImPost->GetV(cPt2di(aUntranslatedCoord.x(), aUntranslatedCoord.y())));
+                    mDImOut->SetV(cPt2di(aUntranslatedCoord.x() + aLastTrPoint.Tr().x(), 
+                                         aUntranslatedCoord.y() + aLastTrPoint.Tr().y()),
+                                  mDImPre->GetV(cPt2di(aUntranslatedCoord.x(), aUntranslatedCoord.y())));
             }
-
-            if (mGenerateDisplacementImage)
-                mDImOut->ToFile("DisplacedPixels.tif");
+            */
         }
     }
 
