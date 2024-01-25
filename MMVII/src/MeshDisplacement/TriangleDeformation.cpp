@@ -287,7 +287,11 @@ namespace MMVII
                 std::vector<double> aLastVObs(12, 0.0);
 
                 for (const cPt2di &aOutPix : *mDImOut)
+                {
                     mDImOut->SetV(aOutPix, mDImPre->GetV(aOutPix));
+                    mDImDepX->SetV(aOutPix, 0);
+                    mDImDepY->SetV(aOutPix, 0);
+                }
 
                 for (size_t aLTr = 0; aLTr < mDelTri.NbFace(); aLTr++)
                 {
@@ -315,25 +319,41 @@ namespace MMVII
                     for (size_t aLastFilledPixel = 0; aLastFilledPixel < aLastNumberOfInsidePixels; aLastFilledPixel++)
                     {
                         const cPtInsideTriangles aPixInsideTriangle = cPtInsideTriangles(aLastCompTri, aLastVectorToFillWithInsidePixels, 
-                                                                                        aLastFilledPixel, *mDImPre);
+                                                                                         aLastFilledPixel, *mDImPre);
                         // prepare for barycenter translation formula by filling aVObs with different coordinates
                         FormalInterpBarycenter_SetObs(aLastVObs, 0, aPixInsideTriangle);
 
                         // image of a point in triangle by current homothety
                         const cPt2dr aLastTranslatedFilledPoint = ApplyBarycenterTranslationFormulaToFilledPixel(aLastCurTrPointA, aLastCurTrPointB, 
                                                                                                                  aLastCurTrPointC, aLastVObs);
-                        tREAL8 aXCoordinates = aPixInsideTriangle.GetCartesianCoordinates().x();
-                        tREAL8 aYCoordinates = aPixInsideTriangle.GetCartesianCoordinates().y();
-                        mDImDepX->SetV(cPt2di(aXCoordinates, aYCoordinates),
-                                       aLastTranslatedFilledPoint.x() - aXCoordinates);
-                        mDImDepY->SetV(cPt2di(aXCoordinates, aYCoordinates),
-                                       aLastTranslatedFilledPoint.y() - aYCoordinates);
+                        const tREAL8 aXCoordinate = aPixInsideTriangle.GetCartesianCoordinates().x();
+                        const tREAL8 aYCoordinate = aPixInsideTriangle.GetCartesianCoordinates().y();
+                        mDImDepX->SetV(cPt2di(aXCoordinate, aYCoordinate),
+                                       aLastTranslatedFilledPoint.x() - aXCoordinate);
+                        mDImDepY->SetV(cPt2di(aXCoordinate, aYCoordinate),
+                                       aLastTranslatedFilledPoint.y() - aYCoordinate);
                     }
                 }
 
                 for (const cPt2di & aDepPix: *mDImOut)
-                    mDImOut->SetV(aDepPix, mDImPre->GetV(cPt2di(aDepPix.x() + mDImDepX->GetV(aDepPix),
-                                                                aDepPix.y() + mDImDepY->GetV(aDepPix))));                
+                {
+                    if (aDepPix.x() + mDImDepX->GetV(aDepPix) < 0 && aDepPix.y() + mDImDepY->GetV(aDepPix) < 0)
+                        mDImOut->SetV(aDepPix, mDImPre->GetV(cPt2di(aDepPix.x(), aDepPix.y())));
+                    else
+                    {
+                        if (aDepPix.x() + mDImDepX->GetV(aDepPix) < 0)
+                            mDImOut->SetV(aDepPix, mDImPre->GetV(cPt2di(aDepPix.x(), aDepPix.y() + mDImDepY->GetV(aDepPix))));
+                        else
+                        {
+                            if (aDepPix.y() + mDImDepY->GetV(aDepPix) < 0)
+                                mDImOut->SetV(aDepPix, mDImPre->GetV(cPt2di(aDepPix.x() + mDImDepX->GetV(aDepPix), 
+                                                                            aDepPix.y())));
+                            else
+                                mDImOut->SetV(aDepPix, mDImPre->GetV(cPt2di(aDepPix.x() + mDImDepX->GetV(aDepPix), 
+                                                                            aDepPix.y() + mDImDepY->GetV(aDepPix))));
+                        }
+                    }
+                }
                 mDImOut->ToFile("DisplacedPixels.tif");
             }
             /*
