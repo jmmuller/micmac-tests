@@ -90,7 +90,7 @@ namespace MMVII
         tImDispl aResSsEch(aSzRed);
 
         for (const auto &aPix : aResSsEch.DIm())
-            aResSsEch.DIm().SetV(aPix, RandUnif_C());
+                aResSsEch.DIm().SetV(aPix, RandUnif_C());
 
         ExpFilterOfStdDev(aResSsEch.DIm(), 5, Norm2(aSzRed) / aNbBlob);
         NormalizedAvgDev(aResSsEch.DIm(), 1e-10, 2.0);
