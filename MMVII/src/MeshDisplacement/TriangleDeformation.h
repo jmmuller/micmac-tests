@@ -105,7 +105,6 @@ namespace MMVII
 
         std::vector<cPt2dr> mVectorPts;                  // A vector containing a set of points
         cTriangulation2D<tREAL8> mDelTri;                // A Delaunay triangle
-        std::vector<cPt2dr> mFinalTranslatedPixelCoords; // Final translation coefficients
 
         cResolSysNonLinear<tREAL8> *mSys; ///< Non Linear Sys for solving problem
         cCalculator<double> *mEqHomTri;   ///< calculator giving access to values and derivatives
