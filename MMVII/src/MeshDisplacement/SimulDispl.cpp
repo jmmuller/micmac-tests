@@ -41,7 +41,7 @@ namespace MMVII
 
         // ==   Optionnal args ====
 
-        tREAL8 mAmplDef;
+        //tREAL8 mAmplDef;
         bool mWithDisc;
 
         // ==    Internal variables ====
@@ -55,7 +55,7 @@ namespace MMVII
     cAppli_SimulDispl::cAppli_SimulDispl(
         const std::vector<std::string> &aVArgs,
         const cSpecMMVII_Appli &aSpec) : cMMVII_Appli(aVArgs, aSpec),
-                                         mAmplDef(2.0),
+                                         // mAmplDef(2.0),
                                          mWithDisc(true),
                                          mImIn(cPt2di(1, 1)),
                                          mDImIn(nullptr),
@@ -74,7 +74,7 @@ namespace MMVII
     {
 
         return anArgOpt
-               << AOpt2007(mAmplDef, "Ampl", "Amplitude of deformation", {eTA2007::HDV})
+               // << AOpt2007(mAmplDef, "Ampl", "Amplitude of deformation", {eTA2007::HDV})
                << AOpt2007(mWithDisc, "WithDisc", "Do we add disconinuities", {eTA2007::HDV});
     }
 
@@ -83,7 +83,7 @@ namespace MMVII
     cAppli_SimulDispl::tImDispl cAppli_SimulDispl::GenerateSmoothRandDispl()
     {
         tREAL8 aDeZoom = 10.0;
-        tREAL8 aNbBlob = 10.0;
+        // tREAL8 aNbBlob = 10.0;
 
         cPt2di aSzRed = Pt_round_up(ToR(mSz) / aDeZoom);
 
@@ -92,16 +92,17 @@ namespace MMVII
         for (const auto &aPix : aResSsEch.DIm())
                 aResSsEch.DIm().SetV(aPix, RandUnif_C());
 
-        ExpFilterOfStdDev(aResSsEch.DIm(), 5, Norm2(aSzRed) / aNbBlob);
-        NormalizedAvgDev(aResSsEch.DIm(), 1e-10, 2.0);
-
+        // ExpFilterOfStdDev(aResSsEch.DIm(), 5, Norm2(aSzRed) / aNbBlob);
+        // NormalizedAvgDev(aResSsEch.DIm(), 1e-10, 2.0);
+        /*
         tImDispl aRes(mSz);
         for (const auto &aPix : aRes.DIm())
         {
             cPt2dr aPixSE = ToR(aPix) / aDeZoom;
             aRes.DIm().SetV(aPix, aResSsEch.DIm().DefGetVBL(aPixSE, 0));
         }
-        return aRes;
+        */
+        return aResSsEch;
     }
 
     int cAppli_SimulDispl::Exe()
