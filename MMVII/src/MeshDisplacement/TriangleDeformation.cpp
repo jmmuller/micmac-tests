@@ -379,8 +379,8 @@ namespace MMVII
                     }
                 }
 
-                mDImDepX->ToFile("DisplacedPixelsX.tif");
-                mDImDepY->ToFile("DisplacedPixelsY.tif");
+                mDImDepX->ToFile("DisplacedPixelsX_" + std::to_string(mNumberPointsToGenerate) + "_" + std::to_string(mNumberOfOptimisationIterations) + ".tif");
+                mDImDepY->ToFile("DisplacedPixelsY_" + std::to_string(mNumberPointsToGenerate) + "_" + std::to_string(mNumberOfOptimisationIterations) + ".tif");
                 mDImOut->ToFile("DisplacedPixels.tif");
             }
 
