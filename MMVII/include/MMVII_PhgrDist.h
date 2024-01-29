@@ -45,28 +45,27 @@ namespace MMVII
 
     const std::vector<cDescOneFuncDist> &VDesc_RadiomCPI(int aDegree, int aDRadElim = -1);
 
-/**  Class for generating distorsion random BUT invertible on certain domain,
-    used for checking functionnalities on distorsion implying inversio
-*/
-class cRandInvertibleDist
-{
-   public :
-       typedef NS_SymbolicDerivative::cCalculator<double> tCalc;
-       cRandInvertibleDist
-       (
-              const cPt3di & aDeg,   ///< Degree of the distortio,
-              double aRhoMax,        ///< Radius on which it must be invertible
-              double aProbaNotNul,   ///< Probability for a coefficient to be not 0
-              double aTargetSomJac,   ///< Target majoration of jacobian
-              bool   isFraserMode
-       );
-       cDataNxNMapCalcSymbDer<double,2> *  MapDerSymb();
-       const std::vector<double> & VParam() const;  ///< Accessor to parameters
-       ~cRandInvertibleDist();
-       tCalc & EqVal();
-       tCalc & EqDer();
-   private :
-       cRandInvertibleDist(const cRandInvertibleDist &) = delete;
+    /**  Class for generating distorsion random BUT invertible on certain domain,
+        used for checking functionnalities on distorsion implying inversio
+    */
+    class cRandInvertibleDist
+    {
+    public:
+        typedef NS_SymbolicDerivative::cCalculator<double> tCalc;
+        cRandInvertibleDist(
+            const cPt3di &aDeg,   ///< Degree of the distortio,
+            double aRhoMax,       ///< Radius on which it must be invertible
+            double aProbaNotNul,  ///< Probability for a coefficient to be not 0
+            double aTargetSomJac, ///< Target majoration of jacobian
+            bool isFraserMode);
+        cDataNxNMapCalcSymbDer<double, 2> *MapDerSymb();
+        const std::vector<double> &VParam() const; ///< Accessor to parameters
+        ~cRandInvertibleDist();
+        tCalc &EqVal();
+        tCalc &EqDer();
+
+    private:
+        cRandInvertibleDist(const cRandInvertibleDist &) = delete;
 
         double mRhoMax;
         cPt3di mDeg;                            ///< Degree of dist

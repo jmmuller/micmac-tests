@@ -59,8 +59,10 @@ namespace MMVII
         void DoOneIteration(const bool aIsLastIter);
         void LoopOverTrianglesAndUpdateParameters(const bool aIsLastIter);
         void InitialisationAfterExe();
-        cPt2dr ApplyBarycenterTranslationFormulaToFilledPixel(const tHomot2d &aCurrentTranslationPointA, const tHomot2d &aCurrentTranslationPointB,
-                                                              const tHomot2d &aCurrentTranslationPointC, std::vector<double> &aVObs);
+        cPt2dr ApplyBarycenterTranslationFormulaToFilledPixel(const tHomot2d &aCurrentTranslationPointA, 
+                                                              const tHomot2d &aCurrentTranslationPointB,
+                                                              const tHomot2d &aCurrentTranslationPointC, 
+                                                              std::vector<double> &aVObs);
 
     private:
         // ==  Mandatory args ====

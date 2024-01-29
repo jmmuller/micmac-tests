@@ -44,8 +44,8 @@ namespace MMVII
 
     cAppli_cTriangleDeformation::cAppli_cTriangleDeformation(const std::vector<std::string> &aVArgs,
                                                              const cSpecMMVII_Appli &aSpec) : cMMVII_Appli(aVArgs, aSpec),
-                                                                                              mRandomUniformLawUpperBoundLines(5),
-                                                                                              mRandomUniformLawUpperBoundCols(5),
+                                                                                              mRandomUniformLawUpperBoundLines(1),
+                                                                                              mRandomUniformLawUpperBoundCols(1),
                                                                                               mShow(true),
                                                                                               mGenerateDisplacementImage(false),
                                                                                               mSzImPre(cPt2di(1, 1)),
@@ -123,7 +123,7 @@ namespace MMVII
     void cAppli_cTriangleDeformation::GeneratePointsForDelaunay()
     {
         // If user hasn't defined another value than the default value, it is changed
-        if (mRandomUniformLawUpperBoundLines == 5 && mRandomUniformLawUpperBoundCols == 5)
+        if (mRandomUniformLawUpperBoundLines == 1 && mRandomUniformLawUpperBoundCols == 1)
         {
             // Maximum value of coordinates are drawn from [0, NumberOfImageLines[
             mRandomUniformLawUpperBoundLines = mSzImPre.y();
@@ -131,11 +131,11 @@ namespace MMVII
         }
         else
         {
-            if (mRandomUniformLawUpperBoundLines != 5 && mRandomUniformLawUpperBoundCols == 5)
+            if (mRandomUniformLawUpperBoundLines != 1 && mRandomUniformLawUpperBoundCols == 1)
                 mRandomUniformLawUpperBoundCols = mSzImPre.x();
             else
             {
-                if (mRandomUniformLawUpperBoundLines == 5 && mRandomUniformLawUpperBoundCols != 5)
+                if (mRandomUniformLawUpperBoundLines == 1 && mRandomUniformLawUpperBoundCols != 1)
                     mRandomUniformLawUpperBoundLines = mSzImPre.y();
             }
         }
@@ -161,14 +161,14 @@ namespace MMVII
         mImDiff = tIm(mSzImPre);
         mDImDiff = &mImDiff.DIm();
 
-        for (const auto &aDiffPix : *mDImDiff)
+        for (const cPt2di &aDiffPix : *mDImDiff)
             mDImDiff->SetV(aDiffPix, mDImPre->GetV(aDiffPix) - mDImPost->GetV(aDiffPix));
         const int aNumberOfPixelsInImage = mSzImPre.x() * mSzImPre.y();
 
         tREAL8 aSumPixelValuesInDiffImage = 0;
         tREAL8 aMaxPixelValuesInDiffImage = 0;
         tREAL8 aDiffImPixelValue = 0;
-        for (const auto &aDiffPix : *mDImDiff)
+        for (const cPt2di &aDiffPix : *mDImDiff)
         {
             aDiffImPixelValue = mDImDiff->GetV(aDiffPix);
             aSumPixelValuesInDiffImage += aDiffImPixelValue;
@@ -176,7 +176,6 @@ namespace MMVII
                 aMaxPixelValuesInDiffImage = aDiffImPixelValue;
         }
 
-        StdOut() << "The average value of the difference image between the Pre and Post images is : " << aSumPixelValuesInDiffImage / (tREAL8)aNumberOfPixelsInImage << std::endl;
         StdOut() << "The average value of the difference image between the Pre and Post images is : " << aSumPixelValuesInDiffImage / (tREAL8)aNumberOfPixelsInImage << std::endl;
         StdOut() << "The maximum value of the difference image between the Pre and Post images is : " << aMaxPixelValuesInDiffImage << std::endl;
     }
@@ -243,6 +242,7 @@ namespace MMVII
                                         0); // current homothety translation 3rd point of triangle
 
             const size_t aNumberOfInsidePixels = aVectorToFillWithInsidePixels.size();
+
             // Loop over all pixels inside triangle
             // size_t is necessary as there can be a lot of pixels in triangles
             for (size_t aFilledPixel = 0; aFilledPixel < aNumberOfInsidePixels; aFilledPixel++)
