@@ -36,11 +36,11 @@ namespace MMVII
     cPt2dr cPtInsideTriangles::GetCartesianCoordinates() const { return mFilledIndices; }                 // Accessor
     tREAL8 cPtInsideTriangles::GetPixelValue() const { return mValueOfPixel; }                            // Accessor
 
-    /********************************************/
-    /*                                          */
-    /*            cTriangleDeformation          */
-    /*                                          */
-    /********************************************/
+    /******************************************/
+    /*                                        */
+    /*          cTriangleDeformation          */
+    /*                                        */
+    /******************************************/
 
     cAppli_cTriangleDeformation::cAppli_cTriangleDeformation(const std::vector<std::string> &aVArgs,
                                                              const cSpecMMVII_Appli &aSpec) : cMMVII_Appli(aVArgs, aSpec),
@@ -125,8 +125,9 @@ namespace MMVII
         // If user hasn't defined another value than the default value, it is changed
         if (mRandomUniformLawUpperBoundLines == 1 && mRandomUniformLawUpperBoundCols == 1)
         {
-            // Maximum value of coordinates are drawn from [0, NumberOfImageLines[
+            // Maximum value of coordinates are drawn from [0, NumberOfImageLines[ for lines
             mRandomUniformLawUpperBoundLines = mSzImPre.y();
+            // Maximum value of coordinates are drawn from [0, NumberOfImageColumns[ for columns
             mRandomUniformLawUpperBoundCols = mSzImPre.x();
         }
         else
@@ -189,12 +190,12 @@ namespace MMVII
         // auto aYTri = aYCoordinates + aAlphaCoordinate * aGeomTrYPointA + aBetaCoordinate * aGeomTrYPointB + aGammaCoordinate * aGeomTrYPointC;
 
         // apply current barycenter translation formula for x and y on current observations.
-        tREAL8 aXTri = aVObs[0] + aVObs[2] * aCurrentTranslationPointA.Tr().x() + aVObs[3] * aCurrentTranslationPointB.Tr().x() +
+        const tREAL8 aXTri = aVObs[0] + aVObs[2] * aCurrentTranslationPointA.Tr().x() + aVObs[3] * aCurrentTranslationPointB.Tr().x() +
                        aVObs[4] * aCurrentTranslationPointC.Tr().x();
-        tREAL8 aYTri = aVObs[1] + aVObs[2] * aCurrentTranslationPointA.Tr().y() + aVObs[3] * aCurrentTranslationPointB.Tr().y() +
+        const tREAL8 aYTri = aVObs[1] + aVObs[2] * aCurrentTranslationPointA.Tr().y() + aVObs[3] * aCurrentTranslationPointB.Tr().y() +
                        aVObs[4] * aCurrentTranslationPointC.Tr().y();
 
-        cPt2dr aComputedTranslatedPixel = cPt2dr(aXTri, aYTri);
+        const cPt2dr aComputedTranslatedPixel = cPt2dr(aXTri, aYTri);
 
         return aComputedTranslatedPixel;
     }
@@ -379,8 +380,10 @@ namespace MMVII
                     }
                 }
 
-                mDImDepX->ToFile("DisplacedPixelsX_" + std::to_string(mNumberPointsToGenerate) + "_" + std::to_string(mNumberOfOptimisationIterations) + ".tif");
-                mDImDepY->ToFile("DisplacedPixelsY_" + std::to_string(mNumberPointsToGenerate) + "_" + std::to_string(mNumberOfOptimisationIterations) + ".tif");
+                mDImDepX->ToFile("DisplacedPixelsX_" + std::to_string(mNumberPointsToGenerate) 
+                                 + "_" + std::to_string(mNumberOfOptimisationIterations) + ".tif");
+                mDImDepY->ToFile("DisplacedPixelsY_" + std::to_string(mNumberPointsToGenerate) 
+                                 + "_" + std::to_string(mNumberOfOptimisationIterations) + ".tif");
                 mDImOut->ToFile("DisplacedPixels.tif");
             }
 

@@ -71,6 +71,8 @@ namespace MMVII
       // compute formula of bilinear interpolation
       auto aEstimatedValueTri = FormalBilinTri_Formula(aVObs, TriangleDisplacement_NbObs, aXTri, aYTri);
 
+      // auto newVal = mul * aEstimatedValueTri + add
+
       // residual is simply the difference between values in before image and estimated value in new image.
       return {aIntensityImPre - aEstimatedValueTri};
     }
