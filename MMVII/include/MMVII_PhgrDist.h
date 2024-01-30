@@ -14,7 +14,7 @@ namespace MMVII
         eDecY,  ///< Coefficient for decentric distorsion y mean derived by Cy (it has X and Y components)
         eMonX,  ///< Coefficient for a monom in X, of the polynomial distorsion
         eMonY,  ///< Coefficient for a monom in Y, of the polynomial distorsion
-        eMonom, ///< Coefficient for a monom in X or Y
+        eMonom, ///< Coefficient for a monom in X or Y, used for example in Radiom where there is no reason to sep X/Y
         eNbVals ///< Tag for number of value
     };
 
@@ -22,14 +22,14 @@ namespace MMVII
          it is used for computing the formula, the vector of name and (later) automatize
          conversion, print understandable values ....
 
-         It's rather bad design with the same classe coding different things, and some fields
-         used of not according to the others, but as it internal/final classes, quick and dirty
-         exceptionnaly allowed ...
-    */
+     It's rather bad design with the same classe coding different things, and some fields
+     used of not according to the others, but as it internal/final classes, quick and dirty
+     exceptionnaly allowed ...
+*/
     class cDescOneFuncDist
     {
     public:
-        cDescOneFuncDist(eTypeFuncDist aType,const cPt2di aDeg,bool isFraserMode);
+        cDescOneFuncDist(eTypeFuncDist aType, const cPt2di aDeg, bool isFraserMode);
         /// Majorarion of norms of jacobian , used in simulation
         double MajNormJacOfRho(double aRho) const;
 
@@ -40,15 +40,8 @@ namespace MMVII
         int mNum;              ///< Order for radial and decentric
         int mDegTot;           ///< Total degree of the polynome
     };
-        eTypeFuncDist mType;   ///< Type of dist (Rad, DecX ....)
-        std::string mName;     ///< Name : used as id for code gen & prety print
-        std::string mLongName; ///< explicit long name
-        cPt2di mDegMon;        ///< Degree for a polynomial
-        int mNum;              ///< Order for radial and decentric
-        int mDegTot;           ///< Total degree of the polynome
-    };
 
-    std::vector<cDescOneFuncDist>   DescDist(const cPt3di & aDeg,bool isFraserMode);
+    std::vector<cDescOneFuncDist> DescDist(const cPt3di &aDeg, bool isFraserMode);
 
     const std::vector<cDescOneFuncDist> &VDesc_RadiomCPI(int aDegree, int aDRadElim = -1);
 
@@ -59,14 +52,12 @@ namespace MMVII
     {
     public:
         typedef NS_SymbolicDerivative::cCalculator<double> tCalc;
-         cRandInvertibleDist
-        (
-              const cPt3di & aDeg,   ///< Degree of the distortio,
-              double aRhoMax,        ///< Radius on which it must be invertible
-              double aProbaNotNul,   ///< Probability for a coefficient to be not 0
-              double aTargetSomJac,   ///< Target majoration of jacobian
-              bool   isFraserMode
-        );
+        cRandInvertibleDist(
+            const cPt3di &aDeg,   ///< Degree of the distortio,
+            double aRhoMax,       ///< Radius on which it must be invertible
+            double aProbaNotNul,  ///< Probability for a coefficient to be not 0
+            double aTargetSomJac, ///< Target majoration of jacobian
+            bool isFraserMode);
         cDataNxNMapCalcSymbDer<double, 2> *MapDerSymb();
         const std::vector<double> &VParam() const; ///< Accessor to parameters
         ~cRandInvertibleDist();
@@ -83,10 +74,9 @@ namespace MMVII
         tCalc *mEqDer;                          ///< Calculator for values and derivatoves
         int mNbParam;                           ///< Number of parameters
         std::vector<double> mVParam;            ///< Computed parameters
-        bool                     mIsFraserMode; ///<  Std Mode / SIA Mode
+        bool mIsFraserMode;                     ///<  Std Mode / SIA Mode
     };
 
-    // ==========================  utility to generate names  ===================
     // ==========================  utility to generate names  ===================
 
     std::vector<std::string> NamesP3(const std::string &aPref);                      /// x y z
@@ -106,16 +96,16 @@ namespace MMVII
          derivate to x,y for example in iterative inversion)
            UK=x,y  Obs=K1,K2 .....   K1 r +K2 R^3 ...
      */
-    NS_SymbolicDerivative::cCalculator<double> * EqDist(const cPt3di & aDeg,bool WithDerive,int aSzBuf,bool isFraserMode);
+    NS_SymbolicDerivative::cCalculator<double> *EqDist(const cPt3di &aDeg, bool WithDerive, int aSzBuf, bool isFraserMode);
 
     /** Allocate a calculator computing the base familly of a distorsion  UK=x,y Obs=K1,K2 .....  Kr, K2 R^3 , idem previous
         but does not return the sum, but the series of each independant function, used for least-square  feating with a
         given familly of func (for example in approximat inversion by least square)
      */
-    NS_SymbolicDerivative::cCalculator<double> * EqBaseFuncDist(const cPt3di & aDeg,int aSzBuf,bool isFraserMode);
+    NS_SymbolicDerivative::cCalculator<double> *EqBaseFuncDist(const cPt3di &aDeg, int aSzBuf, bool isFraserMode);
 
     /** Alloc a map corresponding to  distorsions :   create a map interface to an EqDist */
-    cDataNxNMapCalcSymbDer<double,2> * NewMapOfDist(const cPt3di & aDeg,const std::vector<double> & aVObs,int aSzBuf,bool isFraserMode);
+    cDataNxNMapCalcSymbDer<double, 2> *NewMapOfDist(const cPt3di &aDeg, const std::vector<double> &aVObs, int aSzBuf, bool isFraserMode);
 
     // .............   Equation implying only projection  .............
 
@@ -125,7 +115,7 @@ namespace MMVII
     NS_SymbolicDerivative::cCalculator<double> *EqCPProjInv(eProjPC aType, bool WithDerive, int aSzBuf);
 
     // .............   Equation colinearity , imply external parameter, Projectiion, distorsion, foc+PP .............
-    NS_SymbolicDerivative::cCalculator<double> * EqColinearityCamPPC(eProjPC  aType,const cPt3di & aDeg,bool WithDerive,int aSzBuf,bool ReUse,bool isFraserMode);
+    NS_SymbolicDerivative::cCalculator<double> *EqColinearityCamPPC(eProjPC aType, const cPt3di &aDeg, bool WithDerive, int aSzBuf, bool ReUse, bool isFraserMode);
 
     // .............   Equation radiometry .............
     NS_SymbolicDerivative::cCalculator<double> *EqRadiomVignettageLinear(int aNbDeg, bool WithDerive, int aSzBuf, bool WithCste, int aDegPolSens);
@@ -135,9 +125,9 @@ namespace MMVII
     NS_SymbolicDerivative::cCalculator<double> *EqRadiomStabilization(int aDegSens, int aDegIm, bool WithDerive, int aSzBuf, bool WithCste, int aDegPolSens);
 
     // .............   Equation on rigid bloc .............
-    NS_SymbolicDerivative::cCalculator<double> *EqBlocRig(bool WithDerive, int aSzBuf, bool Reuse); // RIGIDBLOC
+    NS_SymbolicDerivative::cCalculator<double> *EqBlocRig(bool WithDerive, int aSzBuf, bool Reuse);      // RIGIDBLOC
+    NS_SymbolicDerivative::cCalculator<double> *EqBlocRig_RatE(bool WithDerive, int aSzBuf, bool Reuse); // RIGIDBLOC
 
-    //  ====   equations used in tuto/bench/ devpt of surface  ==============================
     //  ====   equations used in tuto/bench/ devpt of surface  ==============================
 
     // .............   Equation implying 2D distance conservation .............
@@ -157,9 +147,14 @@ namespace MMVII
 
     // .............   Equation implying topo subframe .............
 
-    /// Calc for parametrizes dist, Uk={a,b,c,x1,y1,z1,x2,y2,z2} Obs={r00, r01, r02, r10, r11, r12, r20, r21, r22, dx,dy,dz},
-    /// let pk=(xk,yk,zk), R=(r00..r22)  Residual :  R(p2-p2) - {dx,dy,dz}
-    NS_SymbolicDerivative::cCalculator<double> *EqTopoSubFrame(bool WithDerive, int aSzBuf);
+/// Calc for parametrizes dist, Uk={a,b,c,x1,y1,z1,x2,y2,z2} Obs={r00, r01, r02, r10, r11, r12, r20, r21, r22, dx,dy,dz},
+/// let pk=(xk,yk,zk), R=(r00..r22)  Residual :  R(p2-p2) - {dx,dy,dz}
+NS_SymbolicDerivative::cCalculator<double> * EqTopoSubFrame(bool WithDerive,int aSzBuf);
+
+/// Sum of square of unknown, to test non linear constraints
+NS_SymbolicDerivative::cCalculator<double> * EqSumSquare(int aNb,bool WithDerive,int aSzBuf,bool ReUse);
+
+
 
     // .............   Equation implying 2D distance conservation .............
 
@@ -170,12 +165,6 @@ namespace MMVII
 
     // .............   Covariance propagation  .............
 
-    /// For propag cov in network
-    NS_SymbolicDerivative::cCalculator<double> *EqNetworkConsDistProgCov(bool WithDerive, int aSzBuf, const cPt2di &aSzN);
-    /// For propag in network  W/O covariance (i.e propagate directly the points)
-    NS_SymbolicDerivative::cCalculator<double> *EqNetworkConsDistFixPoints(bool WithDerive, int aSzBuf, const cPt2di &aSzN, bool WithSimUK);
-    ///  idem, but more adapted to real case (as in surface devlopment)
-    NS_SymbolicDerivative::cCalculator<double> *EqNetworkConsDistFixPoints(bool WithDerive, int aSzBuf, int aNbPts);
     /// For propag cov in network
     NS_SymbolicDerivative::cCalculator<double> *EqNetworkConsDistProgCov(bool WithDerive, int aSzBuf, const cPt2di &aSzN);
     /// For propag in network  W/O covariance (i.e propagate directly the points)

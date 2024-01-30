@@ -35,7 +35,6 @@ namespace MMVII
     private:
         tImDispl GenerateSmoothRandDispl();
 
-
         // ==   Mandatory args ====
         std::string mNameImage; ///< name of the input image to deform
 
@@ -167,17 +166,14 @@ namespace MMVII
         return tMMVII_UnikPApli(new cAppli_SimulDispl(aVArgs, aSpec));
     }
 
-cSpecMMVII_Appli  TheSpec_SimulDispl
-(
-     "SimulDispl",
-      Alloc_SimulDispl,
-      "Generate smooth displacement and deformed image",
-      {eApF::ImProc},
-      {eApDT::Image},
-      {eApDT::Image},
-      __FILE__
-);
-
+    cSpecMMVII_Appli TheSpec_SimulDispl(
+        "SimulDispl",
+        Alloc_SimulDispl,
+        "Generate smooth displacement and deformed image",
+        {eApF::ImProc},
+        {eApDT::Image},
+        {eApDT::Image},
+        __FILE__);
 
 #if (0)
 #endif

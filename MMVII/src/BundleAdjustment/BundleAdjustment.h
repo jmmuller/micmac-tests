@@ -13,19 +13,24 @@ namespace MMVII
  *      -  it add (potentially many)  unknowns and then  it take more place in  memory & time
  */
 
-class cPt3dr_UK :  public cObjWithUnkowns<tREAL8>,
-                   public cMemCheck
+/*
+template <const int Dim>  class cPtxdr_UK :  public cObjWithUnkowns<tREAL8>,
+                                             public cMemCheck
 {
-      public :
-              cPt3dr_UK(const cPt3dr &);
-              ~cPt3dr_UK();
-              void PutUknowsInSetInterval() override;
-              const cPt3dr & Pt() const ;
-      private :
-              cPt3dr_UK(const cPt3dr_UK&) = delete;
-              cPt3dr mPt;
+   public :
+      typedef cPtxd<tREAL8,Dim>  tPt;
+
+      cPtxdr_UK(const tPt &);
+      ~cPtxdr_UK();
+      void PutUknowsInSetInterval() override;
+      const tPt & Pt() const ;
+   private :
+      cPtxdr_UK(const cPtxdr_UK&) = delete;
+      tPt mPt;
 };
 
+typedef cPtxdr_UK<3> cPt3dr_UK ;
+*/
 
 /**  "Standard" weighting classes, used the following formula
  *
@@ -122,7 +127,7 @@ class cMMVII_BundleAdj
 	  void AddMTieP(cComputeMergeMulTieP  * aMTP,const cStdWeighterResidual & aWIm);
 
           /// One iteration : add all measure + constraint + Least Square Solve/Udpate/Init
-          void OneIteration();
+          void OneIteration(tREAL8 aLVM=0.0);
 
           const std::vector<cSensorImage *> &  VSIm() const ;  ///< Accessor
           const std::vector<cSensorCamPC *> &  VSCPC() const;   ///< Accessor
@@ -133,6 +138,9 @@ class cMMVII_BundleAdj
 	  void SetParamFrozenCalib(const std::string & aPattern);
 	  void SetViscosity(const tREAL8& aViscTr,const tREAL8& aViscAngle);
 	  void SetFrozenCenters(const std::string & aPattern);
+	  void SetFrozenOrients(const std::string & aPattern);
+          void SetSharedIntrinsicParams(const std::vector<std::string> &);
+           
 
 	  void AddPoseViscosity();
 	  void AddConstrainteRefPose();
@@ -140,6 +148,7 @@ class cMMVII_BundleAdj
 
 
 	  void SaveBlocRigid();
+          void Save_newGCP();
 
      private :
 
@@ -158,6 +167,8 @@ class cMMVII_BundleAdj
 
           ///  One It for 1 pack of GCP (4 now 1 pack allowed, but this may change)
           void OneItere_OnePackGCP(const cSetMesImGCP *);
+
+          void CompileSharedIntrinsicParams(bool ForAvg);
 
 
           //============== Data =============================
@@ -180,6 +191,9 @@ class cMMVII_BundleAdj
 
 	  std::string  mPatParamFrozenCalib;  /// Pattern for name of paramater of internal calibration
 	  std::string  mPatFrozenCenter;      /// Pattern for name of pose with frozen centers
+	  std::string  mPatFrozenOrient;      /// Pattern for name of pose with frozen centers
+
+          std::vector<std::string>  mVPatShared;
 
           // ===================  Information to use ==================
 	     
@@ -213,4 +227,3 @@ class cMMVII_BundleAdj
 
 
 };
-

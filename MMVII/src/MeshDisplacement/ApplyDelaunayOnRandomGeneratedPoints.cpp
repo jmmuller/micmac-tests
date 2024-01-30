@@ -168,6 +168,8 @@ namespace MMVII
 
 	void cAppli_RandomGeneratedDelaunay::ConstructUniformRandomVector()
 	{
+		// Use current time as seed for random generator 
+    	srand(time(0)); 
 		// Generate coordinates from drawing lines and columns of coordinates from a uniform distribution
 		for (int aNbPt = 0; aNbPt < mNumberPointsToGenerate; aNbPt++)
 		{

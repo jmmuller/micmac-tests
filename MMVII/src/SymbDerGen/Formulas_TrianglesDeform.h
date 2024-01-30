@@ -31,7 +31,7 @@ namespace MMVII
       return Append
                   (
                     std::vector<std::string>{"PixelCoordinatesX", "PixelCoordinatesY", "AlphaCoordPixel", "BetaCoordPixel", "GammaCoordPixel", "IntensityImPre"},
-                    FormalBilinIm2D_NameObs("T")  // 6 obs for bilinear interpol of Im
+                    FormalBilinIm2D_NameObs("T") // 6 obs for bilinear interpol of Im
                   );
     }
 
@@ -40,18 +40,18 @@ namespace MMVII
     template <typename tUk, typename tObs>
     static std::vector<tUk> formula(
         const std::vector<tUk> &aVUnk,
-        const std::vector<tObs> &aVObs) // const
+        const std::vector<tObs> &aVObs)
     {
-      size_t IndTri = 0;
+      // size_t IndTri = 0;
       // size_t IndX = IndTri + TriangleDisplacement_NbObs;
 
       // extract observation on model
-      const auto &aXCoordinate = aVObs[IndTri];
-      const auto &aYCoordinate = aVObs[IndTri + 1];
-      const auto &aAlphaCoordinate = aVObs[IndTri + 2];
-      const auto &aBetaCoordinate = aVObs[IndTri + 3];
-      const auto &aGammaCoordinate = aVObs[IndTri + 4];
-      const auto &aIntensityImPre = aVObs[IndTri + 5];
+      const auto &aXCoordinate = aVObs[0];
+      const auto &aYCoordinate = aVObs[1];
+      const auto &aAlphaCoordinate = aVObs[2];
+      const auto &aBetaCoordinate = aVObs[3];
+      const auto &aGammaCoordinate = aVObs[4];
+      const auto &aIntensityImPre = aVObs[5];
 
       // extract unknowns
       // const auto &aRadSc = aVUk[0];
@@ -59,11 +59,11 @@ namespace MMVII
       // const auto &aGeomScale = aVUnk[1];
 
       const auto &aGeomTrXPointA = aVUnk[0];
-      const auto &aGeomTrYPointA = aVUnk[0];
-      const auto &aGeomTrXPointB = aVUnk[1];
-      const auto &aGeomTrYPointB = aVUnk[1];
-      const auto &aGeomTrXPointC = aVUnk[2];
-      const auto &aGeomTrYPointC = aVUnk[2];
+      const auto &aGeomTrYPointA = aVUnk[1];
+      const auto &aGeomTrXPointB = aVUnk[2];
+      const auto &aGeomTrYPointB = aVUnk[3];
+      const auto &aGeomTrXPointC = aVUnk[4];
+      const auto &aGeomTrYPointC = aVUnk[5];
 
       auto aXTri = aXCoordinate + aAlphaCoordinate * aGeomTrXPointA + aBetaCoordinate * aGeomTrXPointB + aGammaCoordinate * aGeomTrXPointC;
       auto aYTri = aYCoordinate + aAlphaCoordinate * aGeomTrYPointA + aBetaCoordinate * aGeomTrYPointB + aGammaCoordinate * aGeomTrYPointC;

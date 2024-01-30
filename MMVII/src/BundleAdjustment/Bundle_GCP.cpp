@@ -123,6 +123,8 @@ void cMMVII_BundleAdj::OneItere_OnePackGCP(const cSetMesImGCP * aSet)
                }
 	    }
 
+           if (aVMesGCP.at(aKp).isFree())
+               continue;
 	    if (! aGcpUk) // case  subst,  we now can make schurr commpl and subst
 	    {
                 if (! aGcpFix)  // if GCP is not hard fix, we must add obs on ground
@@ -149,28 +151,40 @@ void cMMVII_BundleAdj::OneItere_GCP()
      }
 }
 
+void cMMVII_BundleAdj::Save_newGCP()
+{
+    if (mMesGCP  && mPhProj->DPPointsMeasures().DirOutIsInit())
+    {
+        mPhProj->SaveGCP(mNewGCP.ExtractSetGCP("NewGCP"));
+        for (const auto & aMes1Im : mMesGCP->MesImInit())
+             mPhProj->SaveMeasureIm(aMes1Im);
+    }
+}
+
     /* ---------------------------------------- */
     /*            cPt3dr_UK                     */
     /* ---------------------------------------- */
 
-cPt3dr_UK::cPt3dr_UK(const cPt3dr & aPt) :
+template <const int Dim> cPtxdr_UK<Dim>::cPtxdr_UK(const tPt & aPt) :
     mPt  (aPt)
 {
 }
 
-cPt3dr_UK::~cPt3dr_UK()
+
+template <const int Dim>  cPtxdr_UK<Dim>::~cPtxdr_UK()
 {
         OUK_Reset();
 }
 
-void cPt3dr_UK::PutUknowsInSetInterval()
+template <const int Dim> void cPtxdr_UK<Dim>::PutUknowsInSetInterval()
 {
     mSetInterv->AddOneInterv(mPt);
 }
-const cPt3dr & cPt3dr_UK::Pt() const {return mPt;}
+template <const int Dim>  const cPtxd<tREAL8,Dim> & cPtxdr_UK<Dim>::Pt() const {return mPt;}
+
+
+template class cPtxdr_UK<2>;
+template class cPtxdr_UK<3>;
 
 
 };
-
-
-

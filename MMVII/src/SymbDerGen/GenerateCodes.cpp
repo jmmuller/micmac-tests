@@ -318,10 +318,15 @@ namespace MMVII
         return StdAllocCalc(NameFormula(cTopoSubFrame(), WithDerive), aSzBuf);
     }
 
-    cCalculator<double> *EqTopoSubFrame(bool WithDerive, int aSzBuf)
-    {
-        return TplEqTopoSubFrame<double>(WithDerive, aSzBuf);
-    }
+cCalculator<double> * EqTopoSubFrame(bool WithDerive,int aSzBuf)
+{
+    return TplEqTopoSubFrame<double>(WithDerive,aSzBuf);
+}
+
+cCalculator<double> * EqSumSquare(int aNb,bool WithDerive,int aSzBuf,bool ReUse)
+{
+    return StdAllocCalc(NameFormula(cFormulaSumSquares(8),WithDerive),aSzBuf,false,ReUse);
+}
 
     /* **************************** */
     /*      BENCH  PART             */
@@ -644,6 +649,8 @@ namespace MMVII
 
         for (const auto WithDer : {true, false})
         {
+       GenCodesFormula((tREAL8*)nullptr,cFormulaSumSquares(8),WithDer); // RIGIDBLOC
+
             GenCodesFormula((tREAL8 *)nullptr, cFormulaBlocRigid(), WithDer);   // RIGIDBLOC
             GenCodesFormula((tREAL8 *)nullptr, cFormulaRattBRExist(), WithDer); // RIGIDBLOC
 

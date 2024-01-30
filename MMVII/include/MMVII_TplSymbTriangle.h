@@ -86,9 +86,9 @@ namespace MMVII
         SetOrPush(aVObs, aK0 + 5, Type(aPixInsideTriangle.GetPixelValue()));
     }
 
-    /*
-    This is the "companion" function of  FormalBilinTri_Formula, it fills
-    the vector aVObs with X0,Y0,I00, that will be used in FormalBilinTri_Formula.
+    /* 
+    This is the "companion" function of  FormalBilinIm2D_Formula, it fills
+    the vector aVObs with X0,Y0,I00, that will be used in FormalBilinIm2D_Formula.
     */
 
     template <class Type, class TypeIm>
