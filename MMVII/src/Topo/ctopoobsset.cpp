@@ -105,7 +105,7 @@ std::vector<int> cTopoObsSet::getParamIndices() const
 
 //----------------------------------------------------------------
 cTopoObsSetStation::cTopoObsSetStation(cBA_Topo *aBA_Topo) :
-    cTopoObsSet(aBA_Topo, eTopoObsSetType::eStation), mIsVericalized(true), mIsOriented(true),
+    cTopoObsSet(aBA_Topo, eTopoObsSetType::eStation), mIsVericalized(true), mIsOriented(false),
     mRot(tRot::Identity()), mRotOmega({0.,0.,0.}), mOriginName(""),mPtOrigin(nullptr)
 {
 }
@@ -137,6 +137,7 @@ void cTopoObsSetStation::AddToSys(cSetInterUK_MultipeObj<tREAL8> & aSet)
     std::cout<<"AddToSys SetStation mRotOmega "<<&mRotOmega<<std::endl;
 #endif
     aSet.AddOneObj(&mRotOmega);
+    aSet.AddOneObj(this); // to have OnUpdate called on SetVUnKnowns
 }
 
 void cTopoObsSetStation::createParams()
@@ -146,7 +147,12 @@ void cTopoObsSetStation::createParams()
 
 void cTopoObsSetStation::OnUpdate()
 {
-    // TODO: copy pose update
+    // like cPoseWithUK::OnUpdate(), without -...
+    mRot = mRot * cRotation3D<tREAL8>::RotFromAxiator(mRotOmega.Pt());
+
+    std::cout<<"  OnUpdate mRotOmega: "<<mRotOmega.Pt()<<"\n";
+       // now this have modify rotation, the "delta" is void :
+    mRotOmega.Pt() = cPt3dr(0,0,0);
 }
 
 void cTopoObsSetStation::PushRotObs(std::vector<double> & aVObs) const
@@ -160,6 +166,12 @@ std::string cTopoObsSetStation::toString() const
     oss<<"   origin: "<<mOriginName;
     if (mPtOrigin)
         oss<<" "<<*mPtOrigin->getPt();
+    oss<<"\n   mRotOmega: "<<mRotOmega.Pt()<<"   ";
+    oss<<"\n   mRot:\n";
+    oss<<"      "<<mRot.AxeI()<<"\n";
+    oss<<"      "<<mRot.AxeJ()<<"\n";
+    oss<<"      "<<mRot.AxeK()<<"\n";
+
     return  cTopoObsSet::toString() + oss.str();
 }
 
@@ -169,7 +181,6 @@ void cTopoObsSetStation::makeConstraints(cResolSysNonLinear<tREAL8> & aSys)
     // TODO: depends on bubbling etc.
     if (mIsVericalized && mIsOriented)
     {
-        mRot = tRot::Identity();
         mRotOmega.Pt() = {0.,0.,0.};
 #ifdef VERBOSE_TOPO
         std::cout<<"Freeze rotation for "<<&mRotOmega<<std::endl;
@@ -178,8 +189,21 @@ void cTopoObsSetStation::makeConstraints(cResolSysNonLinear<tREAL8> & aSys)
         aSys.SetFrozenVarCurVal(mRotOmega,mRotOmega.Pt());
         //for (int i=mRotOmega.IndUk0()+3;i<mRotOmega.IndUk1();++i)
         //    aSys.AddEqFixCurVar(i,0.001);
-    } else {
-        MMVII_INTERNAL_ASSERT_strong(false,"Not fixed orientation station is forbidden");
+    }
+    else if (mIsVericalized)
+    {
+        mRotOmega.Pt() = {0.,0.,0.};
+#ifdef VERBOSE_TOPO
+        std::cout<<"Freeze bascule for "<<&mRotOmega<<std::endl;
+        std::cout<<"  rotation indices "<<mRotOmega.IndUk0()<<"-"<<mRotOmega.IndUk1()-2<<std::endl;
+#endif
+        aSys.SetFrozenVarCurVal(mRotOmega,mRotOmega.Pt().PtRawData(), 2); // not z
+        //for (int i=mRotOmega.IndUk0()+3;i<mRotOmega.IndUk1()-1;++i)
+        //    aSys.AddEqFixCurVar(i,0.001);
+    }
+    else
+    {
+        MMVII_INTERNAL_ASSERT_strong(false,"Not fixed orientation station is forbidden for now");
     }
 }
 

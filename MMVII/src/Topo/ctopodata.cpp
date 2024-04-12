@@ -258,25 +258,23 @@ void cTopoData::createEx2()
 cTopoData cTopoData::createEx3()
 {
     cTopoPointData aPt1 = {"St1",cPt3dr(100,100,100),false,cPt3dr(0.01,0.01,0.01)};
-    cTopoPointData aPt2 = {"Tr1",cPt3dr(105,115,105),true};
+    cTopoPointData aPt2 = {"Ori1",cPt3dr(100,110,100),false,cPt3dr(0.01,0.01,0.01)};
+    cTopoPointData aPt3 = {"Tr1",cPt3dr(105,115,105),true}; // 107.072, 107.072, 100
 
-    cTopoObsData aObs1 = {eTopoObsType::eHz, {"St1", "Tr1"},  {M_PI/2.}, {0.001}};
-    cTopoObsData aObs2 = {eTopoObsType::eZen, {"St1", "Tr1"},  {0.}, {0.001}};
-    cTopoObsData aObs3 = {eTopoObsType::eDist, {"St1", "Tr1"},  {10.}, {0.001}};
-    cTopoObsData aObs4 = {eTopoObsType::eDist, {"St1", "Tr1"},  {10.002}, {0.001}};
+    double g0 = 0.2;
+    cTopoObsData aObs1 = {eTopoObsType::eHz, {"St1", "Ori1"},  {M_PI/2. + g0}, {0.001}};
+    cTopoObsData aObs2 = {eTopoObsType::eHz, {"St1", "Tr1"},  {M_PI/4. + g0}, {0.001}};
+    cTopoObsData aObs3 = {eTopoObsType::eZen, {"St1", "Tr1"},  {0.}, {0.001}};
+    cTopoObsData aObs4 = {eTopoObsType::eDist, {"St1", "Tr1"},  {10.}, {0.001}};
+    cTopoObsData aObs5 = {eTopoObsType::eDist, {"St1", "Tr1"},  {10.002}, {0.001}};
 
     cTopoObsSetData aSet1;
     aSet1.mType = eTopoObsSetType::eStation;
-    aSet1.mObs = {aObs1, aObs2, aObs3, aObs4};
-
-    cTopoObsData aObs5 = {eTopoObsType::eDist, {"Tr1", "St1"},  {10.002}, {0.001}};
-    cTopoObsSetData aSet2;
-    aSet2.mType = eTopoObsSetType::eStation;
-    aSet2.mObs = {aObs5};
+    aSet1.mObs = {aObs1, aObs2, aObs3, aObs4, aObs5};
 
     cTopoData aTopoData;
-    aTopoData.mAllPoints = {aPt1, aPt2};
-    aTopoData.mAllObsSets = {aSet1, aSet2};
+    aTopoData.mAllPoints = {aPt1, aPt2, aPt3};
+    aTopoData.mAllObsSets = {aSet1};
 
     return aTopoData;
 }

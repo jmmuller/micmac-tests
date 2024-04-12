@@ -277,7 +277,7 @@ void BenchTopoComp(cParamExeBench & aParam)
     cSetInterUK_MultipeObj<double> aSetIntervMultObj;
     double aLVM = 0.;
 
-    cTopoData aTopoData = cTopoData::createEx1();
+    cTopoData aTopoData = cTopoData::createEx3();
     aTopoData.ToFile(cMMVII_Appli::TmpDirTestMMVII()+"bench-in.json");
 
     cBA_Topo aTopo(nullptr, cMMVII_Appli::TmpDirTestMMVII()+"bench-in.json");
@@ -291,7 +291,7 @@ void BenchTopoComp(cParamExeBench & aParam)
     cDenseVect<double> aVUk = aSetIntervMultObj.GetVUnKnowns();
     cResolSysNonLinear<double>  aSys = cResolSysNonLinear<double>(eModeSSR::eSSR_LsqNormSparse,aVUk);
 
-    for (int iter=0; iter<5; ++iter)
+    for (int iter=0; iter<6; ++iter)
     {
 #ifdef VERBOSE_TOPO
         std::cout<<"Iter "<<iter<<std::endl;
