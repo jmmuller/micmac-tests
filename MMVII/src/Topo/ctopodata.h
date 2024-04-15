@@ -64,7 +64,7 @@ public:
     std::optional<bool> mStationIsVericalized;
     std::optional<bool> mStationIsOriented;
     std::optional<tREAL8> mStationG0; // just output
-    std::optional<cRotation3D<tREAL8>> mStationRot; // just output
+    std::optional<cRotation3D<tREAL8>> mRotVert2Instr; // just output
 };
 
 void AddData(const cAuxAr2007 & anAux, cTopoObsSetData & aObsSet);

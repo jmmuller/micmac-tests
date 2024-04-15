@@ -74,7 +74,7 @@ void cTopoObsSetData::AddData(const  cAuxAr2007 & anAuxInit)
     AddOptData(anAux,"StationIsVericalized",mStationIsVericalized);
     AddOptData(anAux,"StationIsOriented",mStationIsOriented);
     AddOptData(anAux,"G0",mStationG0);
-    //AddOptData(anAux,"StationRot",mStationRot); // TODO
+    //AddOptData(anAux,"StationRot",mRotVert2Instr); // TODO
 }
 
 
@@ -110,6 +110,7 @@ cTopoData::cTopoData(cBA_Topo* aBA_topo)
             aSetData.mStationIsOriented = set->isOriented();
             aSetData.mStationIsVericalized = set->isVericalized();
             aSetData.mStationG0 = set->getG0();
+            aSetData.mRotVert2Instr = set->getRotVert2Instr();
             break;
         }
         default:

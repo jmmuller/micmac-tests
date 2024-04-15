@@ -77,7 +77,8 @@ public:
     void PushRotObs(std::vector<double> & aVObs) const;
     cPt3dr_UK & getRotOmega() { return mRotOmega; }
     cTopoPoint * getPtOrigin() const { return mPtOrigin; }
-    tREAL8 getG0();
+    tREAL8 getG0() const;
+    const tRot & getRotVert2Instr() const { return mRotVert2Instr; }
     bool isVericalized(){ return mIsVericalized; }
     void setIsVericalized(bool isVert){ mIsVericalized = isVert; }
     bool isOriented(){ return mIsOriented; }
@@ -91,7 +92,7 @@ protected:
 
     bool mIsVericalized; // bubbled (orientation free only around vertical)
     bool mIsOriented;    // rotation around vertical is fixed
-    tRot mRot;        //< the station orientation
+    tRot mRotVert2Instr;        //< the station orientation from local vertical frame
     cPt3dr_UK mRotOmega; //< the station orientation unknown
     std::string mOriginName;
     cTopoPoint *mPtOrigin;

@@ -88,7 +88,7 @@ std::vector<int> cTopoObsSet::getParamIndices() const
 //----------------------------------------------------------------
 cTopoObsSetStation::cTopoObsSetStation(cBA_Topo *aBA_Topo) :
     cTopoObsSet(aBA_Topo, eTopoObsSetType::eStation), mIsVericalized(true), mIsOriented(false),
-    mRot(tRot::Identity()), mRotOmega({0.,0.,0.}), mOriginName(""),mPtOrigin(nullptr)
+    mRotVert2Instr(tRot::Identity()), mRotOmega({0.,0.,0.}), mOriginName(""),mPtOrigin(nullptr)
 {
 }
 
@@ -130,7 +130,7 @@ void cTopoObsSetStation::createParams()
 void cTopoObsSetStation::OnUpdate()
 {
     // like cPoseWithUK::OnUpdate(), without -...
-    mRot = mRot * cRotation3D<tREAL8>::RotFromAxiator(mRotOmega.Pt());
+    mRotVert2Instr = mRotVert2Instr * cRotation3D<tREAL8>::RotFromAxiator(mRotOmega.Pt());
 
     //std::cout<<"  OnUpdate mRotOmega: "<<mRotOmega.Pt()<<"\n";
 
@@ -140,7 +140,8 @@ void cTopoObsSetStation::OnUpdate()
 
 void cTopoObsSetStation::PushRotObs(std::vector<double> & aVObs) const
 {
-    mRot.Mat().PushByCol(aVObs);
+    // TODO: push rotLTF2Vert * mRotVert2Instr
+    mRotVert2Instr.Mat().PushByCol(aVObs);
 }
 
 std::string cTopoObsSetStation::toString() const
@@ -151,9 +152,9 @@ std::string cTopoObsSetStation::toString() const
         oss<<" "<<*mPtOrigin->getPt();
     oss<<"\n   mRotOmega: "<<mRotOmega.Pt()<<"   ";
     oss<<"\n   mRot:\n";
-    oss<<"      "<<mRot.AxeI()<<"\n";
-    oss<<"      "<<mRot.AxeJ()<<"\n";
-    oss<<"      "<<mRot.AxeK()<<"\n";
+    oss<<"      "<<mRotVert2Instr.AxeI()<<"\n";
+    oss<<"      "<<mRotVert2Instr.AxeJ()<<"\n";
+    oss<<"      "<<mRotVert2Instr.AxeK()<<"\n";
 
     return  cTopoObsSet::toString() + oss.str();
 }
@@ -212,7 +213,7 @@ bool cTopoObsSetStation::initialize()
                                    aPtTo.getPt()->y() - mPtOrigin->getPt()->y())
                             - obs->getMeasures().at(0);
                 //std::cout<<"Init G0: "<<G0<<std::endl;
-                mRot = mRot * cRotation3D<tREAL8>::RotFromAxiator({0., 0., G0});
+                mRotVert2Instr = mRotVert2Instr * cRotation3D<tREAL8>::RotFromAxiator({0., 0., G0});
                 return true;
             }
         // if there is no Hz mes, fix ori (TODO: fail if Hz but targets not init)
@@ -232,14 +233,14 @@ void cTopoObsSetStation::setOrigin(std::string _OriginName, bool _IsVericalized)
     mPtOrigin = &mBA_Topo->getPoint(_OriginName);
     mOriginName = _OriginName;
     mIsVericalized = _IsVericalized;
-    mRot = tRot::Identity();
+    mRotVert2Instr = tRot::Identity();
     mRotOmega.Pt() = {0.,0.,0.};
 
 }
 
-tREAL8 cTopoObsSetStation::getG0()
+tREAL8 cTopoObsSetStation::getG0() const
 {
-    return atan2(mRot.Mat().GetElem(0,1), mRot.Mat().GetElem(0,0));
+    return atan2(mRotVert2Instr.Mat().GetElem(0,1), mRotVert2Instr.Mat().GetElem(0,0));
 }
 
 /*
