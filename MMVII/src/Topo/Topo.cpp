@@ -114,6 +114,8 @@ void cBA_Topo::FromData(const cTopoData &aTopoData, const std::vector<cBA_GCP *>
         case eTopoObsSetType::eStation:
         {
             cTopoObsSetStation * st1 = static_cast<cTopoObsSetStation*>(aSet);
+            st1->setIsOriented(aSetData.mStationIsOriented.value_or(false));
+            st1->setIsVericalized(aSetData.mStationIsVericalized.value_or(false));
             std::string aOriginName;
             MMVII_INTERNAL_ASSERT_User(st1->getAllObs().size()>0, eTyUEr::eUnClassedError, "Error: Obs Set without obs.")
             aOriginName = aSet->getObs(0)->getPointName(0);

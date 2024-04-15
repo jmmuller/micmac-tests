@@ -225,6 +225,12 @@ bool cTopoData::addObs(eCompObsTypes code, const std::string & nameFrom, const s
     case eCompObsTypes::eCompDist:
         aObsData = {eTopoObsType::eDist, {nameFrom,nameTo}, {val}, {sigma}};
         break;
+    case eCompObsTypes::eCompHz:
+        aObsData = {eTopoObsType::eHz, {nameFrom,nameTo}, {val}, {sigma}};
+        break;
+    case eCompObsTypes::eCompZen:
+        aObsData = {eTopoObsType::eZen, {nameFrom,nameTo}, {val}, {sigma}};
+        break;
     default:
         StdOut() << "Error, unknown obs code " << (int)code <<".\n";
         return false;
@@ -300,14 +306,16 @@ cTopoData cTopoData::createEx3()
     cTopoPointData aPt3 = {"Tr1",cPt3dr(105,115,105),true}; // 107.072, 107.072, 100
 
     double g0 = 2.2;
-    cTopoObsData aObs1 = {eTopoObsType::eHz, {"St1", "Ori1"},  {0. + g0}, {0.001}};
-    cTopoObsData aObs2 = {eTopoObsType::eHz, {"St1", "Tr1"},  {M_PI/4. + g0}, {0.001}};
+    cTopoObsData aObs1 = {eTopoObsType::eHz, {"St1", "Ori1"},  {0. - g0}, {0.001}};
+    cTopoObsData aObs2 = {eTopoObsType::eHz, {"St1", "Tr1"},  {M_PI/4. - g0}, {0.001}};
     cTopoObsData aObs3 = {eTopoObsType::eZen, {"St1", "Tr1"},  {0.}, {0.001}};
     cTopoObsData aObs4 = {eTopoObsType::eDist, {"St1", "Tr1"},  {10.}, {0.001}};
     cTopoObsData aObs5 = {eTopoObsType::eDist, {"St1", "Tr1"},  {10.002}, {0.001}};
 
     cTopoObsSetData aSet1;
     aSet1.mType = eTopoObsSetType::eStation;
+    aSet1.mStationIsVericalized = true;
+    aSet1.mStationIsOriented = false;
     aSet1.mObs = {aObs1, aObs2, aObs3, aObs4, aObs5};
 
     cTopoData aTopoData;

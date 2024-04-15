@@ -79,7 +79,9 @@ public:
     cTopoPoint * getPtOrigin() const { return mPtOrigin; }
     tREAL8 getG0();
     bool isVericalized(){ return mIsVericalized; }
+    void setIsVericalized(bool isVert){ mIsVericalized = isVert; }
     bool isOriented(){ return mIsOriented; }
+    void setIsOriented(bool isOri){ mIsOriented = isOri; }
 protected:
     cTopoObsSetStation(cBA_Topo *aBA_Topo);
     //cTopoObsSetStation(cTopoObsSetStation const&) = delete;
