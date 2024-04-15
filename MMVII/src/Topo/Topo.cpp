@@ -127,6 +127,9 @@ void cBA_Topo::FromData(const cTopoData &aTopoData, const std::vector<cBA_GCP *>
         default:
             MMVII_INTERNAL_ASSERT_User(false, eTyUEr::eUnClassedError, "Error: unknown eTopoObsSetType.")
         }
+
+        MMVII_INTERNAL_ASSERT_User(aSet->initialize(), eTyUEr::eUnClassedError,
+                                   "Error: Station initialization failed.")
     }
     mIsReady = true;
 }

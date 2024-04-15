@@ -30,6 +30,7 @@ public:
     std::vector<cTopoObs*> & getAllObs() {return mObs;}
     bool addObs(eTopoObsType type, cBA_Topo * aBA_Topo, const std::vector<std::string> &pts, const std::vector<tREAL8> & vals,  const cResidualWeighterExplicit<tREAL8> & aWeights);
     virtual void makeConstraints(cResolSysNonLinear<tREAL8> & aSys) = 0; // add constraints for current set
+    virtual bool initialize() = 0; // initialize set parameters
 protected:
     cTopoObsSet(cBA_Topo *aBA_Topo, eTopoObsSetType type);
     cTopoObsSet(cTopoObsSet const&) = delete;
@@ -70,6 +71,7 @@ public:
     void OnUpdate() override;    ///< "reaction" after linear update, eventually update inversion
     virtual std::string toString() const override;
     void makeConstraints(cResolSysNonLinear<tREAL8> &aSys) override;
+    virtual bool initialize() override; // initialize rotation
 
     void setOrigin(std::string _OriginName, bool _IsVericalized);
     void PushRotObs(std::vector<double> & aVObs) const;
@@ -85,8 +87,8 @@ protected:
     void createAllowedObsTypes() override;
     void createParams() override;
 
-    bool mIsVericalized;
-    bool mIsOriented;
+    bool mIsVericalized; // bubbled (orientation free only around vertical)
+    bool mIsOriented;    // rotation around vertical is fixed
     tRot mRot;        //< the station orientation
     cPt3dr_UK mRotOmega; //< the station orientation unknown
     std::string mOriginName;

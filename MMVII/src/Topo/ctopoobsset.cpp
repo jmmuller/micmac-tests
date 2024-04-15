@@ -189,6 +189,36 @@ void cTopoObsSetStation::makeConstraints(cResolSysNonLinear<tREAL8> & aSys)
     }
 }
 
+
+bool cTopoObsSetStation::initialize()
+{
+#ifdef VERBOSE_TOPO
+    std::cout<<"cTopoObsSetStation::initialize "<<mOriginName<<std::endl;
+#endif
+    if (mIsVericalized && mIsOriented)
+        return true; // nothing to do
+    if (mIsVericalized) // compute initial G0
+    {
+        for (auto & obs: mObs)
+            if (obs->getType() == eTopoObsType::eHz)
+            {
+                // TODO: use projection for init G0
+                // TODO: check if points are init
+                auto & aPtTo = mBA_Topo->getPoint(obs->getPointName(1));
+                tREAL8 G0 = atan2( aPtTo.getPt()->x() - mPtOrigin->getPt()->x(),
+                                   aPtTo.getPt()->y() - mPtOrigin->getPt()->y())
+                            - obs->getMeasures().at(0);
+                std::cout<<"Init G0: "<<G0<<std::endl;
+                mRot = mRot * cRotation3D<tREAL8>::RotFromAxiator({0., 0., G0});
+                return true;
+            }
+        return false;
+    }
+    MMVII_DEV_WARNING("cTopoObsSetStation initialization not ready for not vericalized stations.")
+    return false;
+}
+
+
 void cTopoObsSetStation::setOrigin(std::string _OriginName, bool _IsVericalized)
 {
 #ifdef VERBOSE_TOPO
