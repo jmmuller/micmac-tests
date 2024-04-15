@@ -13,7 +13,7 @@ namespace MMVII
 /**
  * @brief The cTopoObsSet class represents a set of observations sharing the same set of parameters.
  */
-class cTopoObsSet : public cObjWithUnkowns<tREAL8>
+class cTopoObsSet : public cObjWithUnkowns<tREAL8>, public cMemCheck
 {
     friend class cTopoObs;
     friend class cTopoData;

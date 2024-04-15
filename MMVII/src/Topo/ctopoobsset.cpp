@@ -132,8 +132,9 @@ void cTopoObsSetStation::OnUpdate()
     // like cPoseWithUK::OnUpdate(), without -...
     mRot = mRot * cRotation3D<tREAL8>::RotFromAxiator(mRotOmega.Pt());
 
-    std::cout<<"  OnUpdate mRotOmega: "<<mRotOmega.Pt()<<"\n";
-       // now this have modify rotation, the "delta" is void :
+    //std::cout<<"  OnUpdate mRotOmega: "<<mRotOmega.Pt()<<"\n";
+
+    // now this have modify rotation, the "delta" is void :
     mRotOmega.Pt() = cPt3dr(0,0,0);
 }
 
@@ -210,7 +211,7 @@ bool cTopoObsSetStation::initialize()
                 tREAL8 G0 = atan2( aPtTo.getPt()->x() - mPtOrigin->getPt()->x(),
                                    aPtTo.getPt()->y() - mPtOrigin->getPt()->y())
                             - obs->getMeasures().at(0);
-                std::cout<<"Init G0: "<<G0<<std::endl;
+                //std::cout<<"Init G0: "<<G0<<std::endl;
                 mRot = mRot * cRotation3D<tREAL8>::RotFromAxiator({0., 0., G0});
                 return true;
             }
