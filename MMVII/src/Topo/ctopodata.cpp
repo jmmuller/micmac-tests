@@ -63,6 +63,29 @@ void AddData(const cAuxAr2007 & anAux, cTopoObsData & aTopoObs)
 
 
 // -------------------------
+
+void cTopoObsSetData::AddData(const  cAuxAr2007 & anAuxInit)
+{
+    cAuxAr2007 anAux("TopoObsSetData",anAuxInit);
+    //std::cout<<"Add data obs set '"<<toString()<<"'"<<std::endl;
+    MMVII::EnumAddData(anAux,mType,"Type");
+    MMVII::AddData(cAuxAr2007("AllObs",anAux),mObs);
+
+    AddOptData(anAux,"StationIsVericalized",mStationIsVericalized);
+    AddOptData(anAux,"StationIsOriented",mStationIsOriented);
+    AddOptData(anAux,"G0",mStationG0);
+    //AddOptData(anAux,"StationRot",mStationRot); // TODO
+}
+
+
+void AddData(const cAuxAr2007 & anAux, cTopoObsSetData &aObsSet)
+{
+     aObsSet.AddData(anAux);
+}
+
+
+// ------------------------------------
+
 cTopoData::cTopoData(cBA_Topo* aBA_topo)
 {
     for (auto & [aName, aPt] : aBA_topo->getAllPts())
@@ -78,6 +101,21 @@ cTopoData::cTopoData(cBA_Topo* aBA_topo)
     {
         cTopoObsSetData aSetData;
         aSetData.mType = aSet->mType;
+        switch (aSet->mType) {
+        case eTopoObsSetType::eStation:
+        {
+            cTopoObsSetStation* set = dynamic_cast<cTopoObsSetStation*>(aSet);
+            if (!set)
+                MMVII_INTERNAL_ERROR("error set type")
+            aSetData.mStationIsOriented = set->isOriented();
+            aSetData.mStationIsVericalized = set->isVericalized();
+            aSetData.mStationG0 = set->getG0();
+            break;
+        }
+        default:
+            MMVII_INTERNAL_ERROR("unknown obs set type")
+        }
+
         for (auto & aObs : aSet->mObs)
         {
             cTopoObsData aObsData = {
@@ -257,8 +295,8 @@ void cTopoData::createEx2()
 
 cTopoData cTopoData::createEx3()
 {
-    cTopoPointData aPt1 = {"St1",cPt3dr(100,100,100),false,cPt3dr(0.01,0.01,0.01)};
-    cTopoPointData aPt2 = {"Ori1",cPt3dr(100,110,100),false,cPt3dr(0.01,0.01,0.01)};
+    cTopoPointData aPt1 = {"Ori1",cPt3dr(100,110,100),false,cPt3dr(0.01,0.01,0.01)};
+    cTopoPointData aPt2 = {"St1",cPt3dr(100,100,100),false,cPt3dr(0.01,0.01,0.01)};
     cTopoPointData aPt3 = {"Tr1",cPt3dr(105,115,105),true}; // 107.072, 107.072, 100
 
     double g0 = 0.2;

@@ -10,24 +10,6 @@
 namespace MMVII
 {
 
-void cTopoObsSetData::AddData(const  cAuxAr2007 & anAuxInit)
-{
-    cAuxAr2007 anAux("TopoObsSetData",anAuxInit);
-    //std::cout<<"Add data obs set '"<<toString()<<"'"<<std::endl;
-    MMVII::EnumAddData(anAux,mType,"Type");
-    MMVII::AddData(cAuxAr2007("AllObs",anAux),mObs);
-}
-
-
-void AddData(const cAuxAr2007 & anAux, cTopoObsSetData &aObsSet)
-{
-     aObsSet.AddData(anAux);
-}
-
-
-// ------------------------------------
-
-
 cTopoObsSet::cTopoObsSet(cBA_Topo * aBA_Topo, eTopoObsSetType type):
     mType(type), mBA_Topo(aBA_Topo)
 {
@@ -218,6 +200,11 @@ void cTopoObsSetStation::setOrigin(std::string _OriginName, bool _IsVericalized)
     mRot = tRot::Identity();
     mRotOmega.Pt() = {0.,0.,0.};
 
+}
+
+tREAL8 cTopoObsSetStation::getG0()
+{
+    return atan2(mRot.Mat().GetElem(0,1), mRot.Mat().GetElem(0,0));
 }
 
 /*

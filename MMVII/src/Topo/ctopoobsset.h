@@ -75,6 +75,9 @@ public:
     void PushRotObs(std::vector<double> & aVObs) const;
     cPt3dr_UK & getRotOmega() { return mRotOmega; }
     cTopoPoint * getPtOrigin() const { return mPtOrigin; }
+    tREAL8 getG0();
+    bool isVericalized(){ return mIsVericalized; }
+    bool isOriented(){ return mIsOriented; }
 protected:
     cTopoObsSetStation(cBA_Topo *aBA_Topo);
     //cTopoObsSetStation(cTopoObsSetStation const&) = delete;
