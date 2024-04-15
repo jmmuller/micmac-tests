@@ -196,7 +196,9 @@ bool cTopoObsSetStation::initialize()
     std::cout<<"cTopoObsSetStation::initialize "<<mOriginName<<std::endl;
 #endif
     if (mIsVericalized && mIsOriented)
+    {
         return true; // nothing to do
+    }
     if (mIsVericalized) // compute initial G0
     {
         for (auto & obs: mObs)
@@ -212,7 +214,9 @@ bool cTopoObsSetStation::initialize()
                 mRot = mRot * cRotation3D<tREAL8>::RotFromAxiator({0., 0., G0});
                 return true;
             }
-        return false;
+        // if there is no Hz mes, fix ori (TODO: fail if Hz but targets not init)
+        mIsOriented = true;
+        return initialize();
     }
     MMVII_DEV_WARNING("cTopoObsSetStation initialization not ready for not vericalized stations.")
     return false;

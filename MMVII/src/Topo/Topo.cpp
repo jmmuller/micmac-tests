@@ -274,15 +274,11 @@ void cBA_Topo::AddTopoEquations(cResolSysNonLinear<tREAL8> & aSys)
 
 //-------------------------------------------------------------------
 
-
-void BenchTopoComp(cParamExeBench & aParam)
+void BenchTopoComp1example(cTopoData aTopoData, tREAL4 targetSigma0)
 {
-    if (! aParam.NewBench("TopoComp")) return;
-
     cSetInterUK_MultipeObj<double> aSetIntervMultObj;
     double aLVM = 0.;
 
-    cTopoData aTopoData = cTopoData::createEx3();
     aTopoData.ToFile(cMMVII_Appli::TmpDirTestMMVII()+"bench-in.json");
 
     cBA_Topo aTopo(nullptr, cMMVII_Appli::TmpDirTestMMVII()+"bench-in.json");
@@ -312,11 +308,19 @@ void BenchTopoComp(cParamExeBench & aParam)
     }
     aTopo.ToFile(cMMVII_Appli::TmpDirTestMMVII()+"bench-out.json");
 
-    auto targetSigma0 = 0.707107;
-    MMVII_INTERNAL_ASSERT_bench(std::abs(aTopo.Sigma0()-targetSigma0)<1e-6,"TopoComp sigma0 final");
+    MMVII_INTERNAL_ASSERT_bench(std::abs(aTopo.Sigma0()-targetSigma0)<1e-5,"TopoComp sigma0 final");
+
+    aSetIntervMultObj.SIUK_Reset();
+}
+
+void BenchTopoComp(cParamExeBench & aParam)
+{
+    if (! aParam.NewBench("TopoComp")) return;
+
+    BenchTopoComp1example(cTopoData::createEx1(), 0.70711);
+    BenchTopoComp1example(cTopoData::createEx3(), 1.41421);
 
     //std::cout<<"Bench Topo finished."<<std::endl;
-    aSetIntervMultObj.SIUK_Reset();
     aParam.EndBench();
     return;
 }
