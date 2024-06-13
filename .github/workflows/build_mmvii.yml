@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'master'
+      - 'jm_proj'
 
 jobs:
   build_linux:
