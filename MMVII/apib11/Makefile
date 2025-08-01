@@ -41,7 +41,7 @@ export XML_MICMAC_FILES=$(wildcard ../../include/XML_MicMac/*.xml)
 export XML_GEN_FILES=$(wildcard ../../include/XML_GEN/*.xml)
 export XML_MMVII_LOCALPARAMETERS=$(wildcard ../MMVII-LocalParameters/*.xml)
 export XML_MMVII_LOCALPARAMETERS_DEFAULT=../MMVII-LocalParameters/Default/MMVII-UserOfProfile.xml
-export EXTRA_OBJECTS=../bin/libP2007.a ../../lib/libelise.a ../../lib/libANN.a
+export EXTRA_OBJECTS=../bin/libP2007.a
 export MMVII_BIN=../bin/MMVII
 
 
