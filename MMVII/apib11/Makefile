@@ -14,14 +14,24 @@ MMV1_INCLUDES=-I ${MMV1_DIR}/include -I${MMV1_DIR}
 MMV2_INCLUDES=-I ${MMV2_DIR} -I ${MMV2_INCDIR} -I ${MMV2_DIR}/ExternalInclude/eigen-3.4.0
 PYBIND_INCLUDES=$(shell python3 -m pybind11 --includes) 
 
-MMV2_LIBNAME=P2007
-MMV2_LIB=${MMV2_BINDIR}/lib${MMV2_LIBNAME}.a
-MMV1_LIBS=${MMV1_LIBDIR}/libelise.a ${MMV1_LIBDIR}/libANN.a
-
 # =========== Compiler & Flags
-CXX=g++
-LD=g++
-export CXXFLAGS=-fopenmp -std=c++17 -Wall  -Werror -O3 -fPIC 
+ifeq ($(OS),Windows_NT)
+    CXX=cl.exe
+    LD=link.exe
+    RM=del
+    EXTRA_OBJECTS=../bin/libP2007.lib
+    MMVII_BIN=../bin/MMVII.exe
+    CXXFLAGS=/openmp /std:c++17 /Wall /W3 /O2
+else
+    CXX=clang++
+    LD=clang++
+    RM=rm -f
+    EXTRA_OBJECTS=../bin/libP2007.a
+    MMVII_BIN=../bin/MMVII
+    CXXFLAGS=-fopenmp -std=c++17 -Wall -Werror -O3 -fPIC
+endif
+
+export CXXFLAGS
 ALL_INC=${MMV2_INCLUDES} ${MMV1_INCLUDES}  ${PYBIND_INCLUDES}
 
 PYTHON = python3
@@ -41,8 +51,8 @@ export XML_MICMAC_FILES=$(wildcard ../../include/XML_MicMac/*.xml)
 export XML_GEN_FILES=$(wildcard ../../include/XML_GEN/*.xml)
 export XML_MMVII_LOCALPARAMETERS=$(wildcard ../MMVII-LocalParameters/*.xml)
 export XML_MMVII_LOCALPARAMETERS_DEFAULT=../MMVII-LocalParameters/Default/MMVII-UserOfProfile.xml
-export EXTRA_OBJECTS=../bin/libP2007.a
-export MMVII_BIN=../bin/MMVII
+export EXTRA_OBJECTS
+export MMVII_BIN
 
 
 .phony: all clean clean_python install uninstall
@@ -50,18 +60,18 @@ export MMVII_BIN=../bin/MMVII
 all: wheel
 
 clean: clean_python
-	rm -f docstrings.h
-	rm -fr xml
+	$(RM) docstrings.h
+	$(RM)r xml
 
 clean_python:
-	rm -Rf build/ dist/ $(MODULE_NAME).egg-info/ __pycache__/
+	$(RM)R build/ dist/ $(MODULE_NAME).egg-info/ __pycache__/
 
 docstrings.h: $(DOC_INCLUDES) Makefile
-	rm -f $@
-	rm -fr xml
+	$(RM) $@
+	$(RM)r xml
 	(cat Doxyfile ; echo "INPUT=$(DOC_INCLUDES)") | doxygen -
-	python3 makedoc.py xml/class*xml xml/struct*xml xml/namespaceMMVII.xml > $@ || rm -f $@
-	rm -fr xml
+	python3 makedoc.py xml/class*xml xml/struct*xml xml/namespaceMMVII.xml > $@ || $(RM) $@
+	$(RM)r xml
 
 wheel: docstrings.h ${SRCS} ${SRCS_INC} $(MMVII_BIN) $(EXTRA_OBJECTS) $(XML_MICMAC_FILES) $(XML_GEN_FILES) $(XML_MMVII_LOCALPARAMETERS)
 	$(MAKE) clean_python
