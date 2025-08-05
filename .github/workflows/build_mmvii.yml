@@ -194,12 +194,12 @@ jobs:
           MMVII/bin/MMVII.exe
 
   build_apipy:
-    needs: [build_linux] #[build_linux, build_win]
+    needs: [build_linux, build_win] #[build_linux, build_win]
     strategy:
       fail-fast: false
       matrix:
         platform: [ubuntu-latest] # [windows-latest, ubuntu-latest]
-        python-version: ["3.12"] # ["3.9", "3.13"]
+        python-version: ["3.10", "3.12"]
 
     runs-on: ${{ matrix.platform }}
 
@@ -220,13 +220,15 @@ jobs:
       with:
         name: linux-build-artifacts
         path: MMVII/bin/
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: windows-build-artifacts
+        path: MMVII/bin/
+
     - name: Display structure of downloaded files
       run: ls -R MMVII/bin/
-   # - name: Download build artifacts
-   #   uses: actions/download-artifact@v4
-   #   with:
-   #     name: windows-build-artifacts
-   #     path: ./artifacts/windows
 
     - name: Add requirements
       run: python -m pip install --upgrade wheel setuptools
@@ -245,15 +247,6 @@ jobs:
          GH_TOKEN: ${{ github.token }}
       continue-on-error: true
       run: gh release delete MMVII_ApiPyLinux -y --cleanup-tag
-
-    - name: Upload MMVII documentaion
-      uses: softprops/action-gh-release@v2
-      with:
-          name: 'MMVII ApiPy Linux - Latest'
-          tag_name: MMVII_ApiPyLinux
-          make_latest: false
-          token: ${{ secrets.GITHUB_TOKEN }}
-          files: MMVII/apib11/dist/mmvii*.whl
 
     - name: Test
       working-directory: ./MMVII/apib11/examples
