@@ -39,7 +39,11 @@ set(gnu_cxx  "$<COMPILE_LANG_AND_ID:CXX,GNU>")
 
 set(mmv2_src_dir "${PROJECT_SOURCE_DIR}/../src")
 set(mmv2_include_dir "${PROJECT_SOURCE_DIR}/../include" "${PROJECT_SOURCE_DIR}/..")
-set(mmv2_lib "${PROJECT_SOURCE_DIR}/../bin/libP2007.a")
+if(MSVC)
+    set(mmv2_lib "${PROJECT_SOURCE_DIR}/../bin/libP2007.lib")
+else()
+    set(mmv2_lib "${PROJECT_SOURCE_DIR}/../bin/libP2007.a")
+endif()
 set(mmv2_external_include_dir "${PROJECT_SOURCE_DIR}/../ExternalInclude")
 set(EIGEN3_INCLUDE_PATH  "${mmv2_external_include_dir}/eigen-3.4.0")
 
