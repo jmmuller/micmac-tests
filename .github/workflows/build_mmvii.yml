@@ -230,7 +230,7 @@ jobs:
           
     - name: Install GDAL,PROJ with miniconda
       if: runner.os == 'Windows' #&& steps.cache-conda-gdal.outputs.cache-hit != 'true'
-      run: conda install -c conda-forge -q -y proj gdal pybind11 wheel setuptools
+      run: conda install -c conda-forge -q -y proj gdal pybind11 wheel setuptools pkg-config
 
     - name: Download build artifacts
       if: runner.os == 'Linux'
@@ -267,9 +267,10 @@ jobs:
       if: runner.os == 'Windows'
       working-directory: ./MMVII/apib11/
       run: |
+        echo "CMAKE_PREFIX_PATH=$CONDA_PREFIX" >> $GITHUB_ENV
+        echo "PKG_CONFIG_PATH=$CONDA_PREFIX/Library/lib/pkgconfig" >> $GITHUB_ENV
         pip wheel . --no-deps -w dist/
         pip install dist/mmvii*.whl
-
 
     - name: Test
       continue-on-error: true
