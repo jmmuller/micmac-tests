@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(pyMMVII LANGUAGES CXX)
 
+set(PYBIND11_FINDPYTHON ON)
 find_package(pybind11 REQUIRED)
 
 # strict C++17 required
@@ -15,8 +16,17 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 find_package(PROJ QUIET)
 if (NOT  PROJ_FOUND)
   # needed on Ubuntu
-  find_package(PkgConfig)
-  pkg_search_module(PROJ REQUIRED proj)
+  find_package(PkgConfig QUIET)
+  if(PKG_CONFIG_FOUND)
+    pkg_search_module(PROJ REQUIRED proj)
+  endif()
+
+  # Fallback
+  if (NOT PROJ_FOUND AND DEFINED ENV{CONDA_PREFIX})
+    set(PROJ_INCLUDE_DIRS "$ENV{CONDA_PREFIX}/Library/include")
+    set(PROJ_LIBRARIES "$ENV{CONDA_PREFIX}/Library/lib/proj.lib")
+    set(PROJ_FOUND TRUE)
+  endif()
 endif()
 
 if (PROJ_FOUND AND CMAKE_HOST_WIN32)
