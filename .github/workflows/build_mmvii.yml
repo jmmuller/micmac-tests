@@ -200,7 +200,7 @@ jobs:
           MMVII/bin/MMVII.exe
 
   build_apipy:
-    needs: [build_linux, build_win] #[build_linux, build_win]
+   # needs: [build_linux, build_win] #[build_linux, build_win]
     strategy:
       fail-fast: false
       matrix:
@@ -227,27 +227,44 @@ jobs:
       uses: conda-incubator/setup-miniconda@v3
       with:
          auto-update-conda: true
+
+    - name: Install Doxygen
+      if: runner.os == 'Windows'
+      uses: ssciwr/doxygen-install@v1
+    
+    - name: Test Doxygen
+      if: runner.os == 'Windows'
+      run: |
+        doxygen --version
           
     - name: Install GDAL,PROJ with miniconda
       if: runner.os == 'Windows' #&& steps.cache-conda-gdal.outputs.cache-hit != 'true'
       run: conda install -c conda-forge -q -y proj gdal pybind11 wheel setuptools pkg-config
 
-    - name: Download build artifacts
-      if: runner.os == 'Linux'
-      uses: actions/download-artifact@v4
-      with:
-        name: linux-build-artifacts
-        path: MMVII/bin/
+#    - name: Download build artifacts
+#      if: runner.os == 'Linux'
+#      uses: actions/download-artifact@v4
+#      with:
+#        name: linux-build-artifacts
+#        path: MMVII/bin/
 
-    - name: Download build artifacts
+#    - name: Download build artifacts
+#      if: runner.os == 'Windows'
+#      uses: actions/download-artifact@v4
+#      with:
+#        name: windows-build-artifacts
+#        path: MMVII/bin/
+
+#    - name: Display structure of downloaded files
+#      run: ls -R MMVII/bin/
+
+    - name: Check PKG_CONFIG_PATH and proj.pc
       if: runner.os == 'Windows'
-      uses: actions/download-artifact@v4
-      with:
-        name: windows-build-artifacts
-        path: MMVII/bin/
-
-    - name: Display structure of downloaded files
-      run: ls -R MMVII/bin/
+      run: |
+        echo $PKG_CONFIG_PATH
+        dir "C:/Miniconda/envs/test/Library/lib/pkgconfig"
+        pkg-config --list-all
+        conda list proj
 
     - name: Add requirements
       if: runner.os == 'Linux'
@@ -267,10 +284,11 @@ jobs:
       if: runner.os == 'Windows'
       working-directory: ./MMVII/apib11/
       run: |
-        echo "CMAKE_PREFIX_PATH=$CONDA_PREFIX" >> $GITHUB_ENV
-        echo "PKG_CONFIG_PATH=$CONDA_PREFIX/Library/lib/pkgconfig" >> $GITHUB_ENV
         pip wheel . --no-deps -w dist/
         pip install dist/mmvii*.whl
+      env:
+        CMAKE_PREFIX_PATH: "C:/Miniconda/envs/test/Library"
+        PKG_CONFIG_PATH: "C:/Miniconda/envs/test/Library/lib/pkgconfig"
 
     - name: Test
       continue-on-error: true
