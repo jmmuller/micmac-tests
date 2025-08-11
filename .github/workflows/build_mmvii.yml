@@ -278,24 +278,24 @@ jobs:
         CXX: clang++-18
         CC: clang-18
 
-    - name: Build wheel for Windows
-      if: runner.os == 'Windows'
-      working-directory: ./MMVII/apib11/
-      run: python -m cibuildwheel --output-dir wheelhouse
-      env:
-        CMAKE_PREFIX_PATH: "C:/Miniconda/envs/test/Library"
-        PKG_CONFIG_PATH: "C:/Miniconda/envs/test/Library/lib/pkgconfig"
+#    - name: Build wheel for Windows
+#      if: runner.os == 'Windows'
+#      working-directory: ./MMVII/apib11/
+#      run: python -m cibuildwheel --output-dir wheelhouse
+#      env:
+#        CMAKE_PREFIX_PATH: "C:/Miniconda/envs/test/Library"
+#        PKG_CONFIG_PATH: "C:/Miniconda/envs/test/Library/lib/pkgconfig"
 
 
-    - name: Build and install for Linux
-      if: runner.os == 'Linux'
-      working-directory: ./MMVII/apib11/
-      run: |
-        pip wheel . --no-deps -w dist/
-        pip install dist/mmvii*.whl
-      env:
-        CMAKE_PREFIX_PATH: "C:/Miniconda/envs/test/Library"
-        PKG_CONFIG_PATH: "C:/Miniconda/envs/test/Library/lib/pkgconfig"
+#    - name: Build and install for Linux
+#      if: runner.os == 'Linux'
+#      working-directory: ./MMVII/apib11/
+#      run: |
+#        pip wheel . --no-deps -w dist/
+#        pip install dist/mmvii*.whl
+#      env:
+#        CMAKE_PREFIX_PATH: "C:/Miniconda/envs/test/Library"
+#        PKG_CONFIG_PATH: "C:/Miniconda/envs/test/Library/lib/pkgconfig"
 
     - name: Build for Windows
       if: runner.os == 'Windows'
