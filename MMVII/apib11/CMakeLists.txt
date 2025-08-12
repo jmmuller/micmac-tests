@@ -14,7 +14,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # PROJ
 find_package(PROJ QUIET)
-if (NOT  PROJ_FOUND)
+if (NOT PROJ_FOUND)
   # needed on Ubuntu
   find_package(PkgConfig QUIET)
   if(PKG_CONFIG_FOUND)

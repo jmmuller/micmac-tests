@@ -200,11 +200,11 @@ jobs:
           MMVII/bin/MMVII.exe
 
   build_apipy:
-    needs: [build_linux, build_win] #[build_linux, build_win]
+    needs: [build_linux] #[build_linux, build_win]
     strategy:
       fail-fast: false
       matrix:
-        platform: [windows-latest, ubuntu-latest] # [windows-latest, ubuntu-latest]
+        platform: [windows-latest, ubuntu-22.04] # [windows-latest, ubuntu-22.04] # 22.04 for colab
         python-version: ["3.12"] # ["3.10", "3.12"]
 
     runs-on: ${{ matrix.platform }}
@@ -237,14 +237,14 @@ jobs:
       if: runner.os == 'Windows' #&& steps.cache-conda-gdal.outputs.cache-hit != 'true'
       run: conda install -c conda-forge -q -y proj gdal pybind11 wheel setuptools pkg-config
 
-    - name: Download build artifacts
+    - name: Download linux build artifacts
       if: runner.os == 'Linux'
       uses: actions/download-artifact@v4
       with:
         name: linux-build-artifacts
         path: MMVII/bin/
 
-    - name: Download build artifacts
+    - name: Download win build artifacts
       if: runner.os == 'Windows'
       uses: actions/download-artifact@v4
       with:
@@ -266,37 +266,18 @@ jobs:
       if: runner.os == 'Linux'
       run: python -m pip install --upgrade wheel setuptools
 
-
     - name: Install cibuildwheel
       run: python -m pip install cibuildwheel==3.1.3
 
-    - name: Build wheel for Linux
+    - name: Build and install for Linux
       if: runner.os == 'Linux'
       working-directory: ./MMVII/apib11/
-      run: python -m cibuildwheel --output-dir wheelhouse
+      run: |
+        pip wheel . --no-deps -w dist/ --verbose
+        pip install dist/mmvii*.whl
       env:
         CXX: clang++-18
         CC: clang-18
-
-#    - name: Build wheel for Windows
-#      if: runner.os == 'Windows'
-#      working-directory: ./MMVII/apib11/
-#      run: python -m cibuildwheel --output-dir wheelhouse
-#      env:
-#        CMAKE_PREFIX_PATH: "C:/Miniconda/envs/test/Library"
-#        PKG_CONFIG_PATH: "C:/Miniconda/envs/test/Library/lib/pkgconfig"
-
-
-#    - name: Build and install for Linux
-#      if: runner.os == 'Linux'
-#      working-directory: ./MMVII/apib11/
-#      run: |
-#        pip wheel . --no-deps -w dist/
-#        pip install dist/mmvii*.whl
-#      env:
-#        CMAKE_PREFIX_PATH: "C:/Miniconda/envs/test/Library"
-#        PKG_CONFIG_PATH: "C:/Miniconda/envs/test/Library/lib/pkgconfig"
-
     - name: Build for Windows
       if: runner.os == 'Windows'
       working-directory: ./MMVII/apib11/
