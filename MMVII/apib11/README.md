@@ -58,7 +58,14 @@ The built-in Python help system can be used to have information about the API.
 
 See 'examples' directory for use cases.
 
+Use in Colab
+------------
 
+```
+    !pip install mmvii-*-linux_x86_64.whl
+    !apt-get install -y libomp5 libproj22 gdal-bin
+    import MMVII
+```
 
 Binding Conventions
 -------------------
